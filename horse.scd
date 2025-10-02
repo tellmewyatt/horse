@@ -1,4 +1,6 @@
 s.options.memSize = 8192 * 100;
+s.options.numWireBufs = 1024;
+Server.supernova;
 s.reboot;
 ~horseBuffer = Buffer.readChannel(s, "horse-recordings/horse-recordings.wav".resolveRelative, channels:[0]);
 (
@@ -14,8 +16,6 @@ r {
 	};
 	b = Buffer.readChannel(s, "audio/03.flac".resolveRelative, channels:[0]);
 }.play;
-)
-(
 SynthDef(\vocoder, { | out = 0, pan=0, amp = 1, oscDefect=0, freq=100 |
 	var sig = SoundIn.ar(0, 1);
 	var pitch = Pitch.kr(sig);
@@ -75,17 +75,14 @@ SynthDef(\percussiveNoise, { | amp = 1, pan=0, bufnum, out=0, gate=1, release =0
 	sig = Pan2.ar(sig, pan, amp);
 	sig = HPF.ar(FreeVerb2.ar(sig, sig, Rand(0.2, 0.5), 1, ExpRand(0.1, 1)), 800);
 	Out.ar(out, sig * env);
-}).add;)
-(SynthDef(\bassDrum, { | freq = 40, amp = 1, out=0 |
+}).add;
+SynthDef(\bassDrum, { | freq = 40, amp = 1, out=0, releaseTime=1 |
 	var sig = Pan2.ar(
-		SinOsc.ar(Rand(1, 4! 20) * freq, 0.5*pi).mean * amp * EnvGen.kr(Env.perc(0.01), 1, doneAction: 2),
+		SinOsc.ar(Rand(1, 4! 20) * freq, 0.5*pi).mean * amp * EnvGen.kr(Env.perc(0.001, releaseTime), 1, doneAction: 2),
 		0);
 	Out.ar(out, sig);
-}).add;)
-)
+}).add;
 
-
-(
 ~parGroup = ParGroup();
 ~routines = [
 	r {
@@ -154,10 +151,12 @@ SynthDef(\percussiveNoise, { | amp = 1, pan=0, bufnum, out=0, gate=1, release =0
 			[7, 11, 13, 17].choose.wait;
 		}
 	}
-];)
+];
+)
 MIDIIn.connectAll;
 (
-var nnMap = (
+
+~nnMap = (
 	71: { ~routines[0].play; },
 	72: { ~routines[1].play; },
 	36: {
@@ -207,6 +206,42 @@ var nnMap = (
 			\amp, 0.2 * vel / 127
 		], ~parGroup);
 	},
+	52: { | vel |
+		Synth(\normalizedVocoder, [
+			\bufnum, ~convolutionBuffers.choose,
+			\freqRatio, 0.6,
+			\freq, [50, 100, 150, 200, 250, 300].choose + 1800,
+			\convolutionBuffer, ~convolutionBuffers.choose,
+			\reverbMix, 0.2,
+			\pan, rrand(-1.0, 1),
+			\oscDefect, 0.1,
+			\amp, 0.2 * vel / 127
+		], ~parGroup);
+	},
+	57: { | vel |
+		Synth(\normalizedVocoder, [
+			\bufnum, ~convolutionBuffers.choose,
+			\freqRatio, 0.6,
+			\freq, [50, 100, 150, 200, 250, 300].choose + 2400,
+			\convolutionBuffer, ~convolutionBuffers.choose,
+			\reverbMix, 0.2,
+			\pan, rrand(-1.0, 1),
+			\oscDefect, 0.1,
+			\amp, 0.2 * vel / 127
+		], ~parGroup);
+	},
+	62: { | vel |
+		Synth(\normalizedVocoder, [
+			\bufnum, ~convolutionBuffers.choose,
+			\freqRatio, 0.6,
+			\freq, [50, 100, 150, 200, 250, 300].choose + 3000,
+			\convolutionBuffer, ~convolutionBuffers.choose,
+			\reverbMix, 0.2,
+			\pan, rrand(-1.0, 1),
+			\oscDefect, 0.1,
+			\amp, 0.2 * vel / 127
+		], ~parGroup);
+	},
 	38: { | velocity |
 		Synth(\percussiveNoise, [\bufnum, ~convolutionBuffers.choose, \amp, 0.1 * velocity / 127], ~parGroup);
 	},
@@ -223,7 +258,7 @@ MIDIdef.noteOn(\test, { arg ...args;
 	var vel = args[0];
 	[nn, vel].postln;
 	nn.postln;
-	nnMap[nn].(vel);
+	~nnMap[nn].(vel);
 });)
 Synth(\vocoder, [\amp, 2, \oscDefect, 1])
 s.reboot;
