@@ -33,9 +33,9 @@ SynthDef(\horseGallop, { | bufnumL, bufnumR, dur=5, spread=1, amp=0.2, pan = 0, 
 	sig = sig * EnvGen.kr(Env([0,1,1,0], [fadeTime, dur - (fadeTime*2), fadeTime]));
 	Out.ar(out, sig);
 }).add;
-SynthDef(\vocoder, { | out = 0, pan=0, amp = 1, oscDefect=0, freq=100 |
+SynthDef(\vocoder, { | out = 0, pan=0, amp = 1, oscDefect=0, freq=100, gate=1 |
 	var sig = SoundIn.ar(0, 1);
-	var pitch = Pitch.kr(sig);
+	var pitch = Pitch.kr(sig)[0];
 	// Analysis
 	var filters = BPF.ar(sig, 200.collect { | i | (i + 1) * 100 }, 0.1, 1);
 	var amps = filters.collect { | item | Amplitude.ar(item) };
@@ -43,12 +43,13 @@ SynthDef(\vocoder, { | out = 0, pan=0, amp = 1, oscDefect=0, freq=100 |
 	var outsig =  amps.collect ({ | amp, i |
 		SinOsc.ar((i+ 1) * pitch * (1 + (Rand(-1.0, 1) * oscDefect)), 0, amp);
 	}).sum * 2;
-	outsig = outsig;
+	var env = EnvGen.kr(Env.asr(0.01, 1, 0.01), gate, doneAction: 2);
+	outsig = outsig + sig;
 	outsig = Pan2.ar(outsig, pan, amp);
-	outsig = FreeVerb.ar(outsig, 0.2, 1);
-	Out.ar(out, outsig);
+	outsig = FreeVerb2.ar(outsig, outsig, 0.2, 1);
+	Out.ar(out, outsig * env);
 }).add;
-SynthDef(\normalizedVocoder, { | amp=0.2, gate=1, freq=200, out=0, bufnum, pan=0, freqRatio=1, convolutionBuffer, reverbMix=1, oscDefect=0 |
+SynthDef(\normalizedVocoder, { | amp=0.2, gate=1, freq=200, out=0, bufnum, pan=0, freqRatio=1, convolutionBuffer, reverbMix=1, oscDefect=0, envCurve= -4 |
 	// Vocoder section
 	var insig = PlayBuf.ar(
 		1,
@@ -67,7 +68,9 @@ SynthDef(\normalizedVocoder, { | amp=0.2, gate=1, freq=200, out=0, bufnum, pan=0
 	var env = EnvGen.kr(
 		Env.perc(
 			attackTime,
-			BufDur.kr(bufnum) / freqRatio - attackTime
+			BufDur.kr(bufnum) / freqRatio - attackTime,
+			1,
+			envCurve
 		),
 		gate);
 	var doneEnv = EnvGen.kr(
@@ -217,6 +220,18 @@ SynthDef(\bassDrum, { | freq = 40, amp = 1, out=0, releaseTime=1 |
 	},
 	44: { | velocity |
 		Synth(\bassDrum, [\amp, velocity / 127 * 0.5, \releaseTime, 4]);
+	},
+	36: { | velocity |
+		var createSynth = {
+			~vocoder = Synth(\vocoder, [\amp, 2, \oscDefect, 1]);
+			NodeWatcher.register(~vocoder);
+		};
+		if(~vocoder == nil, createSynth, {
+			if(~vocoder.isPlaying, {
+				~vocoder.release;
+				~vocoder = nil;
+			}, createSynth)
+		});
 	},
 	// 2nd Column
 	37: { | vel |
@@ -420,5 +435,3 @@ MIDIdef.noteOn(\test, { arg ...args;
 	nn.postln;
 	~nnMap[nn].(vel);
 });)
-
-Synth(\vocoder, [\amp, 2, \oscDefect, 1]);
