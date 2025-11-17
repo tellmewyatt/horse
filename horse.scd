@@ -4,125 +4,38 @@ s.options.numOutputBusChannels = 2;
 Server.supernova;
 s.reboot;
 MIDIIn.connectAll;
+s.waitForBoot {
+	// Run the setup
+	r {
+		"synthdefs.scd".loadRelative;
+		// Create the effects busses
+		~busses = ();
+		// Create the reverb bus
+		~busses.reverb = Bus.audio(s, s.options.numOutputBusChannels);
+		~samples = ();
+		~convolutionBuffers =
+		40.collect {
+			var buf = Buffer.alloc(s, 1024, 1);
+			buf;
+		};
+		s.sync;
+		~convolutionBuffers.collect { | buf |
+			buf.setn(0, 1024.collect { rrand(0, 1) }).normalize;
+		};
+		~samples.whatami = Buffer.readChannel(s, "audio/03.flac".resolveRelative, channels:[0]);
+		~samples.gallopsL = Buffer.readChannel(s, "audio/gallops.wav".resolveRelative, channels:[0]);
+		~samples.gallopsR = Buffer.readChannel(s, "audio/gallops.wav".resolveRelative, channels:[1]);
+		~samples.neighs = PathName("audio/horse-neighs".resolveRelative).entries.collect { | path |
+			Buffer.readChannel(s, path.absolutePath, channels:[0])
+		};
+	}.play;
+
+}
 )
-~horseBuffer = Buffer.readChannel(s, "horse-recordings/horse-recordings.wav".resolveRelative, channels:[0]);
 (
-r {
-	~samples = ();
-	~convolutionBuffers =
-	40.collect {
-		var buf = Buffer.alloc(s, 1024, 1);
-		buf;
-	};
-	s.sync;
-	~convolutionBuffers.collect { | buf |
-		buf.setn(0, 1024.collect { rrand(0, 1) }).normalize;
-	};
-	~samples.whatami = Buffer.readChannel(s, "audio/03.flac".resolveRelative, channels:[0]);
-	~samples.gallopsL = Buffer.readChannel(s, "audio/gallops.wav".resolveRelative, channels:[0]);
-	~samples.gallopsR = Buffer.readChannel(s, "audio/gallops.wav".resolveRelative, channels:[1]);
-	~samples.neighs = PathName("audio/horse-neighs".resolveRelative).entries.collect { | path |
-		Buffer.readChannel(s, path.absolutePath, channels:[0])
-	};
-}.play;
-SynthDef(\playSample, { | amp=0.2, out=0, pan=0, rate=1, bufnum |
-	Out.ar(out,
-		PanAz.ar(s.options.numOutputBusChannels,
-			PlayBuf.ar(1, bufnum, rate * BufRateScale.kr(bufnum), 1, 0, 0, doneAction: 2),
-			pan,
-			amp,
-			2,
-			0)
-	);
-}).add;
-SynthDef(\horseGallop, { | bufnumL, bufnumR, dur=5, spread=1, amp=0.2, pan = 0, fadeTime=0.2, rateScale=1.4, out=0, grainRate=2, grainDur=1 |
-	var sig;
-	sig = SplayAz.ar(s.options.numOutputBusChannels, [
-		GrainBuf.ar(1, Impulse.kr(grainRate), grainDur, bufnumL, BufRateScale.kr(bufnumL) * rateScale, Line.kr(0, 0.9, dur)) * EnvGen.kr(Env([0,1,1,0], [fadeTime, dur - (fadeTime*2), fadeTime])),
-		GrainBuf.ar(1, Impulse.kr(grainRate), grainDur, bufnumR, BufRateScale.kr(bufnumR) * rateScale, Line.kr(0, 0.9, dur)) * EnvGen.kr(Env([0,1,1,0], [fadeTime, dur - (fadeTime*2), fadeTime]))
-	], Rand(0.1, 1), amp, 2, pan);
-	Out.ar(out, sig);
-}).add;
-SynthDef(\grainBuf, { | bufnum, dur=5, spread=1, amp=0.2, pan = 0, fadeTime=0.2, rateScale=1.4, out=0, grainRate=2, grainDur=1 |
-	var sig;
-	sig = SplayAz.ar(s.options.numOutputBusChannels, [
-		GrainBuf.ar(1, Impulse.kr(grainRate), grainDur, bufnum, BufRateScale.kr(bufnum) * rateScale, Line.kr(0, 0.9, dur)) * EnvGen.kr(Env([0,1,1,0], [fadeTime, dur - (fadeTime*2), fadeTime])),
-		GrainBuf.ar(1, Impulse.kr(grainRate), grainDur, bufnum, BufRateScale.kr(bufnum) * rateScale, Line.kr(0, 0.9, dur)) * EnvGen.kr(Env([0,1,1,0], [fadeTime, dur - (fadeTime*2), fadeTime]))
-	], Rand(0.1, 1), amp, 2, pan);
-	Out.ar(out, sig);
-}).add;
-SynthDef(\vocoder, { | out = 0, pan=0, amp = 1, oscDefect=0, freq=100, gate=1 |
-	var sig = SoundIn.ar(0, 1);
-	var pitch = Pitch.kr(sig)[0];
-	// Analysis
-	var filters = BPF.ar(sig, 200.collect { | i | (i + 1) * 100 }, 0.1, 1);
-	var amps = filters.collect { | item | Amplitude.ar(item) };
-	// Resynthesis
-	var outsig =  amps.collect ({ | amp, i |
-		SinOsc.ar((i+ 1) * pitch * (1 + (Rand(-1.0, 1) * oscDefect)), 0, amp);
-	}).sum * 2;
-	var env = EnvGen.kr(Env.asr(0.01, 1, 0.01), gate, doneAction: 2);
-	outsig = outsig + sig;
-	outsig = PanAz.ar(s.options.numOutputBusChannels, outsig, pan, amp);
-	outsig = FreeVerb.ar(outsig, 0.2, 1);
-	Out.ar(out, outsig * env);
-}).add;
-SynthDef(\normalizedVocoder, { | amp=0.2, gate=1, freq=200, out=0, bufnum, pan=0, freqRatio=1, convolutionBuffer, reverbMix=1, oscDefect=0, envCurve= -4 |
-	// Vocoder section
-	var insig = PlayBuf.ar(
-		1,
-		bufnum,
-		BufRateScale.kr(bufnum) * freqRatio
-	);
-	// Analysis
-	var filters = BPF.ar(insig, 100.collect { | i | (i + 1) * 100 * freqRatio }, 0.1, 1);
-	var amps = filters.collect { | item | Amplitude.ar(item) };
-	// Resynthesis
-	var sig =  amps.collect ({ | amp, i |
-		SinOsc.ar((i+ 1) * freq * (1 + (Rand(-1.0, 1) * oscDefect)), 0, amp);
-	}).sum * 2;
-
-	var attackTime = 1.5 / freqRatio;
-	var env = EnvGen.kr(
-		Env.perc(
-			attackTime,
-			BufDur.kr(bufnum) / freqRatio - attackTime,
-			1,
-			envCurve
-		),
-		gate);
-	var doneEnv = EnvGen.kr(
-		Env.perc(
-			attackTime,
-			BufDur.kr(bufnum) / freqRatio - attackTime + 10
-		),
-		gate, doneAction: 2);
-	sig = Normalizer.ar(sig, 0.5, 0.001) + sig;
-	sig = sig +HPF.ar(Convolution2.ar(sig, convolutionBuffer, 0, 1024) * 0.1, 100);
-	sig = PanAz.ar(
-		s.options.numOutputBusChannels,
-		sig,
-		pan,
-		0.5 * amp * env
-	);
-	sig = FreeVerb.ar(sig, reverbMix, 1);
-	Out.ar(out, sig);
-}).add;
-SynthDef(\percussiveNoise, { | amp = 1, pan=0, bufnum, out=0, gate=1, release =0.01 |
-	var env = EnvGen.kr(Env([0,1,1,0], [0, 15, 0]), gate, doneAction: 2);
-	var sig = PlayBuf.ar(1,bufnum) * 0.8 * EnvGen.ar(Env.perc(0,release));
-	sig = Pan2.ar(sig, pan, amp);
-	sig = HPF.ar(FreeVerb2.ar(sig, sig, Rand(0.2, 0.5), 1, ExpRand(0.1, 1)), 800);
-	Out.ar(out, sig * env);
-}).add;
-SynthDef(\bassDrum, { | freq = 40, amp = 1, out=0, releaseTime=1 |
-	var sig = SplayAz.ar(
-		s.options.numOutputBusChannels,
-		SinOsc.ar(Rand(1, 4! 20) * freq, 0.5*pi) * amp * EnvGen.kr(Env.perc(0.001, releaseTime), 1, doneAction: 2) * 0.3);
-	Out.ar(out, sig);
-}).add;
-
-~parGroup = ParGroup();
+~reverb = Synth(\reverb, [\in, ~busses.reverb]);
+// Create the parallel group that will persist forever
+~parGroup = ParGroup(s);
 ~routines = ();
 ~routines.attackFromEverywhere = r {
 	var freqRatio = 0.1;
@@ -133,7 +46,9 @@ SynthDef(\bassDrum, { | freq = 40, amp = 1, out=0, releaseTime=1 |
 			\freqRatio, freqRatio,
 			\freq, 450 * [1.6, 1.7, 3.9, 4.3].choose /8,
 			\convolutionBuffer, ~convolutionBuffers.choose,
-			\reverbMix, rrand(0.1, 1),
+			\reverbSend, rrand(0.1, 1),
+			\reverbBus, ~busses.reverb,
+			\reverbPreDelay, rrand(0.0, 1),
 			\pan, rrand(-1.0, 1),
 			\oscDefect, oscDefect
 		], ~parGroup);
@@ -165,7 +80,9 @@ SynthDef(\bassDrum, { | freq = 40, amp = 1, out=0, releaseTime=1 |
 			\freqRatio, 0.01,
 			\freq, 450 / divRatio,
 			\convolutionBuffer, ~convolutionBuffers.choose,
-			\reverbMix, rrand(0.1, 1),
+			\reverbSend, rrand(0.1, 1),
+			\reverbBus, ~busses.reverb,
+			\reverbPreDelay, rrand(0, 1.0),
 			\pan, rrand(-1.0, 1),
 			\oscDefect, 0
 
@@ -275,7 +192,8 @@ SynthDef(\bassDrum, { | freq = 40, amp = 1, out=0, releaseTime=1 |
 			\freqRatio, 0.6,
 			\freq, [50, 100, 150, 200, 250, 300].choose,
 			\convolutionBuffer, ~convolutionBuffers.choose,
-			\reverbMix, 0.2,
+			\reverbSend, 0.2,
+			\reverb
 			\pan, rrand(~config.sinHitPanRange.neg, ~config.sinHitPanRange),
 			\oscDefect, 0.1,
 			\amp, 0.2 * vel / 127
