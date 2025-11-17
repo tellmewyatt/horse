@@ -1,5 +1,6 @@
 (s.options.memSize = 8192 * 100;
 s.options.numWireBufs = 1024;
+s.options.numOutputBusChannels = 2;
 Server.supernova;
 s.reboot;
 MIDIIn.connectAll;
@@ -24,13 +25,30 @@ r {
 		Buffer.readChannel(s, path.absolutePath, channels:[0])
 	};
 }.play;
+SynthDef(\playSample, { | amp=0.2, out=0, pan=0, rate=1, bufnum |
+	Out.ar(out,
+		PanAz.ar(s.options.numOutputBusChannels,
+			PlayBuf.ar(1, bufnum, rate * BufRateScale.kr(bufnum), 1, 0, 0, doneAction: 2),
+			pan,
+			amp,
+			2,
+			0)
+	);
+}).add;
 SynthDef(\horseGallop, { | bufnumL, bufnumR, dur=5, spread=1, amp=0.2, pan = 0, fadeTime=0.2, rateScale=1.4, out=0, grainRate=2, grainDur=1 |
 	var sig;
-	sig = Splay.ar([
-		GrainBuf.ar(1, Impulse.kr(grainRate), grainDur, bufnumL, BufRateScale.kr(bufnumL) * rateScale, Line.kr(0, 0.9, dur)),
-		GrainBuf.ar(1, Impulse.kr(grainRate), grainDur, bufnumR, BufRateScale.kr(bufnumR) * rateScale, Line.kr(0, 0.9, dur))
-	], spread, amp, pan);
-	sig = sig * EnvGen.kr(Env([0,1,1,0], [fadeTime, dur - (fadeTime*2), fadeTime]));
+	sig = SplayAz.ar(s.options.numOutputBusChannels, [
+		GrainBuf.ar(1, Impulse.kr(grainRate), grainDur, bufnumL, BufRateScale.kr(bufnumL) * rateScale, Line.kr(0, 0.9, dur)) * EnvGen.kr(Env([0,1,1,0], [fadeTime, dur - (fadeTime*2), fadeTime])),
+		GrainBuf.ar(1, Impulse.kr(grainRate), grainDur, bufnumR, BufRateScale.kr(bufnumR) * rateScale, Line.kr(0, 0.9, dur)) * EnvGen.kr(Env([0,1,1,0], [fadeTime, dur - (fadeTime*2), fadeTime]))
+	], Rand(0.1, 1), amp, 2, pan);
+	Out.ar(out, sig);
+}).add;
+SynthDef(\grainBuf, { | bufnum, dur=5, spread=1, amp=0.2, pan = 0, fadeTime=0.2, rateScale=1.4, out=0, grainRate=2, grainDur=1 |
+	var sig;
+	sig = SplayAz.ar(s.options.numOutputBusChannels, [
+		GrainBuf.ar(1, Impulse.kr(grainRate), grainDur, bufnum, BufRateScale.kr(bufnum) * rateScale, Line.kr(0, 0.9, dur)) * EnvGen.kr(Env([0,1,1,0], [fadeTime, dur - (fadeTime*2), fadeTime])),
+		GrainBuf.ar(1, Impulse.kr(grainRate), grainDur, bufnum, BufRateScale.kr(bufnum) * rateScale, Line.kr(0, 0.9, dur)) * EnvGen.kr(Env([0,1,1,0], [fadeTime, dur - (fadeTime*2), fadeTime]))
+	], Rand(0.1, 1), amp, 2, pan);
 	Out.ar(out, sig);
 }).add;
 SynthDef(\vocoder, { | out = 0, pan=0, amp = 1, oscDefect=0, freq=100, gate=1 |
@@ -45,8 +63,8 @@ SynthDef(\vocoder, { | out = 0, pan=0, amp = 1, oscDefect=0, freq=100, gate=1 |
 	}).sum * 2;
 	var env = EnvGen.kr(Env.asr(0.01, 1, 0.01), gate, doneAction: 2);
 	outsig = outsig + sig;
-	outsig = Pan2.ar(outsig, pan, amp);
-	outsig = FreeVerb2.ar(outsig, outsig, 0.2, 1);
+	outsig = PanAz.ar(s.options.numOutputBusChannels, outsig, pan, amp);
+	outsig = FreeVerb.ar(outsig, 0.2, 1);
 	Out.ar(out, outsig * env);
 }).add;
 SynthDef(\normalizedVocoder, { | amp=0.2, gate=1, freq=200, out=0, bufnum, pan=0, freqRatio=1, convolutionBuffer, reverbMix=1, oscDefect=0, envCurve= -4 |
@@ -76,17 +94,18 @@ SynthDef(\normalizedVocoder, { | amp=0.2, gate=1, freq=200, out=0, bufnum, pan=0
 	var doneEnv = EnvGen.kr(
 		Env.perc(
 			attackTime,
-			BufDur.kr(bufnum) / freqRatio - attackTime + 5
+			BufDur.kr(bufnum) / freqRatio - attackTime + 10
 		),
 		gate, doneAction: 2);
 	sig = Normalizer.ar(sig, 0.5, 0.001) + sig;
 	sig = sig +HPF.ar(Convolution2.ar(sig, convolutionBuffer, 0, 1024) * 0.1, 100);
-	sig = Pan2.ar(
+	sig = PanAz.ar(
+		s.options.numOutputBusChannels,
 		sig,
 		pan,
 		0.5 * amp * env
 	);
-	sig = FreeVerb2.ar(sig[0], sig[1], reverbMix, 1);
+	sig = FreeVerb.ar(sig, reverbMix, 1);
 	Out.ar(out, sig);
 }).add;
 SynthDef(\percussiveNoise, { | amp = 1, pan=0, bufnum, out=0, gate=1, release =0.01 |
@@ -97,88 +116,104 @@ SynthDef(\percussiveNoise, { | amp = 1, pan=0, bufnum, out=0, gate=1, release =0
 	Out.ar(out, sig * env);
 }).add;
 SynthDef(\bassDrum, { | freq = 40, amp = 1, out=0, releaseTime=1 |
-	var sig = Pan2.ar(
-		SinOsc.ar(Rand(1, 4! 20) * freq, 0.5*pi).mean * amp * EnvGen.kr(Env.perc(0.001, releaseTime), 1, doneAction: 2),
-		0);
+	var sig = SplayAz.ar(
+		s.options.numOutputBusChannels,
+		SinOsc.ar(Rand(1, 4! 20) * freq, 0.5*pi) * amp * EnvGen.kr(Env.perc(0.001, releaseTime), 1, doneAction: 2) * 0.3);
 	Out.ar(out, sig);
 }).add;
 
 ~parGroup = ParGroup();
-~routines = [
-	r {
-		var divRatio = 16;
-		while { divRatio >= 1 } {
-			"while still".postln;
-			divRatio.postln;
-			Synth(\normalizedVocoder, [
-				\bufnum, ~samples.whatami,
-				\freqRatio, 0.01,
-				\freq, 450 / divRatio,
-				\convolutionBuffer, ~convolutionBuffers.choose,
-				\reverbMix, rrand(0.1, 1),
-				\pan, rrand(-1, 1),
-				\oscDefect, 0
+~routines = ();
+~routines.attackFromEverywhere = r {
+	var freqRatio = 0.1;
+	var oscDefect = 0;
+	while  { freqRatio <= 0.7 } {
+		Synth(\normalizedVocoder, [
+			\bufnum, ~samples.whatami,
+			\freqRatio, freqRatio,
+			\freq, 450 * [1.6, 1.7, 3.9, 4.3].choose /8,
+			\convolutionBuffer, ~convolutionBuffers.choose,
+			\reverbMix, rrand(0.1, 1),
+			\pan, rrand(-1.0, 1),
+			\oscDefect, oscDefect
+		], ~parGroup);
+		([3,5,7, 11].choose / (freqRatio * 10) ).wait;
+		freqRatio = freqRatio + 0.01;
+		oscDefect = oscDefect + 0.01;
+	};
+};
 
-			], ~parGroup);
-			divRatio = divRatio / 2;
-			(divRatio * 4).wait;
-		};
-		200.wait;
-	},
-	r {
-		var freqRatio = 0.1;
-		var oscDefect = 0;
-		while  { freqRatio <= 0.7 } {
-			Synth(\normalizedVocoder, [
-				\bufnum, ~samples.whatami,
-				\freqRatio, freqRatio,
-				\freq, 450 * [1.6, 1.7, 3.9, 4.3].choose /8,
-				\convolutionBuffer, ~convolutionBuffers.choose,
-				\reverbMix, rrand(0.1, 1),
-				\pan, rrand(-1, 1),
-				\oscDefect, oscDefect
-			], ~parGroup);
-			([3,5,7, 11].choose / (freqRatio * 10) ).wait;
-			freqRatio = freqRatio + 0.01;
-			oscDefect = oscDefect + 0.01;
-		};
-	},
-	r {
-		10.do {
-			Synth(\normalizedVocoder, [
-				\bufnum, ~samples.whatami,
-				\freqRatio, 0.6,
-				\freq, 100,
-				\convolutionBuffer, ~convolutionBuffers.choose,
-				\reverbMix, 0.2,
-				\pan, 0,
-				\oscDefect, 0.1
-			], ~parGroup);
-			[7, 11, 13, 17].choose.wait;
-		}
-	},
-	r {
-		10.do {
-			Synth(\normalizedVocoder, [
-				\bufnum, ~convolutionBuffers.choose,
-				\freqRatio, 0.6,
-				\freq, rrand(50, 300),
-				\convolutionBuffer, ~convolutionBuffers.choose,
-				\reverbMix, 0.2,
-				\pan, rrand(-1.0, 1),
-				\oscDefect, 0.1
-			], ~parGroup);
-			[7, 11, 13, 17].choose.wait;
-		}
-	}
-];
+~routines.longIntro = r {
+	var divRatio = 16;
+	var timeElapsed = 0;
+	"Playing long intro".postln;
+	Synth(\playSample, [\bufnum, ~samples.neighs[0], \amp, 0.2, \pan, 0.125]);
+	Synth(\horseGallop, [
+			\bufnumL, ~samples.gallopsL,
+			\bufnumR, ~samples.gallopsR,
+			\rateScale, 1,
+			\dur, 20,
+			\pan, rrand(-1, 1),
+			\spread, rrand(0, 1.0)
+		], ~parGroup);
+	5.wait;
+	while { divRatio >= 1 } {
+		"while still".postln;
+		divRatio.postln;
+		Synth(\normalizedVocoder, [
+			\bufnum, ~samples.whatami,
+			\freqRatio, 0.01,
+			\freq, 450 / divRatio,
+			\convolutionBuffer, ~convolutionBuffers.choose,
+			\reverbMix, rrand(0.1, 1),
+			\pan, rrand(-1.0, 1),
+			\oscDefect, 0
+
+		], ~parGroup);
+		divRatio = divRatio / 2;
+		(divRatio * 4).wait;
+	};
+	Pbindef(\horseGallops,
+		\instrument, \horseGallop,
+		\bufnumL, ~samples.gallopsL,
+		\bufnumR, ~samples.gallopsR,
+		\rateScale, Pwhite(0.7, 1.5),
+		\dur, Pwhite(20, 30),
+		\delta, Pwhite(20, 40),
+		\pan, Pwhite(-1.0, 1),
+		\spread, Pwhite(0, 1.0)
+	).play;
+	Pbindef(\horseNeighs,
+		\instrument, \grainBuf,
+		\bufnum, Prand(~samples.neighs, inf),
+		\rateScale, Pwhite(0.8, 1.2),
+		\dur, Pwhite(1, 2),
+		\pan, Pwhite(-1.0, 1),
+		\spread, 0,
+		\grainRate, 5,
+		\grainDur, 0.6,
+		\amp, 0.1,
+		\delta, Pwhite(20, 40)
+	).play;
+	120.do {
+		timeElapsed = timeElapsed + 1;
+		timeElapsed.postln;
+		1.wait;
+	};
+	Pbindef(\horseGallops).stop;
+	Pbindef(\horseNeighs).stop;
+	~routines.attackFromEverywhere.play;
+}
 )
 (
+~config = (
+	sinHitPanRange: 0.125
+);
 // This is a 8 x 8 map from [36..99]
 ~nnMap = (
 	// Row 1
-	92: { ~routines[0].play; },
-	84: { ~routines[1].play; },
+	92: { ~routines.longIntro.play; },
+	84: { ~routinesattackFromEverywhere.play; },
 	76: {
 		Synth(\normalizedVocoder, [
 			\bufnum, ~samples.whatami,
@@ -241,7 +276,7 @@ SynthDef(\bassDrum, { | freq = 40, amp = 1, out=0, releaseTime=1 |
 			\freq, [50, 100, 150, 200, 250, 300].choose,
 			\convolutionBuffer, ~convolutionBuffers.choose,
 			\reverbMix, 0.2,
-			\pan, rrand(-1.0, 1),
+			\pan, rrand(~config.sinHitPanRange.neg, ~config.sinHitPanRange),
 			\oscDefect, 0.1,
 			\amp, 0.2 * vel / 127
 		], ~parGroup);
@@ -253,7 +288,7 @@ SynthDef(\bassDrum, { | freq = 40, amp = 1, out=0, releaseTime=1 |
 			\freq, [50, 100, 150, 200, 250, 300].choose + 600,
 			\convolutionBuffer, ~convolutionBuffers.choose,
 			\reverbMix, 0.2,
-			\pan, rrand(-1.0, 1),
+			\pan, rrand(~config.sinHitPanRange.neg, ~config.sinHitPanRange),
 			\oscDefect, 0.1,
 			\amp, 0.2 * vel / 127
 		], ~parGroup);
@@ -265,7 +300,7 @@ SynthDef(\bassDrum, { | freq = 40, amp = 1, out=0, releaseTime=1 |
 			\freq, [50, 100, 150, 200, 250, 300].choose + 1200,
 			\convolutionBuffer, ~convolutionBuffers.choose,
 			\reverbMix, 0.2,
-			\pan, rrand(-1.0, 1),
+			\pan, rrand(~config.sinHitPanRange.neg, ~config.sinHitPanRange),
 			\oscDefect, 0.1,
 			\amp, 0.2 * vel / 127
 		], ~parGroup);
@@ -277,7 +312,7 @@ SynthDef(\bassDrum, { | freq = 40, amp = 1, out=0, releaseTime=1 |
 			\freq, [50, 100, 150, 200, 250, 300].choose + 1800,
 			\convolutionBuffer, ~convolutionBuffers.choose,
 			\reverbMix, 0.2,
-			\pan, rrand(-1.0, 1),
+			\pan, rrand(~config.sinHitPanRange.neg, ~config.sinHitPanRange),
 			\oscDefect, 0.1,
 			\amp, 0.2 * vel / 127
 		], ~parGroup);
@@ -289,7 +324,7 @@ SynthDef(\bassDrum, { | freq = 40, amp = 1, out=0, releaseTime=1 |
 			\freq, [50, 100, 150, 200, 250, 300].choose + 2400,
 			\convolutionBuffer, ~convolutionBuffers.choose,
 			\reverbMix, 0.2,
-			\pan, rrand(-1.0, 1),
+			\pan, rrand(~config.sinHitPanRange.neg, ~config.sinHitPanRange),
 			\oscDefect, 0.1,
 			\amp, 0.2 * vel / 127
 		], ~parGroup);
@@ -301,7 +336,7 @@ SynthDef(\bassDrum, { | freq = 40, amp = 1, out=0, releaseTime=1 |
 			\freq, [50, 100, 150, 200, 250, 300].choose + 3000,
 			\convolutionBuffer, ~convolutionBuffers.choose,
 			\reverbMix, 0.2,
-			\pan, rrand(-1.0, 1),
+			\pan, rrand(~config.sinHitPanRange.neg, ~config.sinHitPanRange),
 			\oscDefect, 0.1,
 			\amp, 0.2 * vel / 127
 		], ~parGroup);
@@ -313,7 +348,7 @@ SynthDef(\bassDrum, { | freq = 40, amp = 1, out=0, releaseTime=1 |
 			\freq, [50, 100, 150, 200, 250, 300].choose + 3600,
 			\convolutionBuffer, ~convolutionBuffers.choose,
 			\reverbMix, 0.2,
-			\pan, rrand(-1.0, 1),
+			\pan, rrand(~config.sinHitPanRange.neg, ~config.sinHitPanRange),
 			\oscDefect, 0.1,
 			\amp, 0.2 * vel / 127
 		], ~parGroup);
@@ -325,7 +360,7 @@ SynthDef(\bassDrum, { | freq = 40, amp = 1, out=0, releaseTime=1 |
 			\freq, [50, 100, 150, 200, 250, 300].choose + 4200,
 			\convolutionBuffer, ~convolutionBuffers.choose,
 			\reverbMix, 0.2,
-			\pan, rrand(-1.0, 1),
+			\pan, rrand(~config.sinHitPanRange.neg, ~config.sinHitPanRange),
 			\oscDefect, 0.1,
 			\amp, 0.2 * vel / 127
 		], ~parGroup);
@@ -435,3 +470,4 @@ MIDIdef.noteOn(\test, { arg ...args;
 	nn.postln;
 	~nnMap[nn].(vel);
 });)
+~routines.longIntro.play;
