@@ -10,7 +10,7 @@
 		}
 ,
 		"classnamespace" : "box",
-		"rect" : [ 35.0, 84.0, 699.0, 739.0 ],
+		"rect" : [ 34.0, 77.0, 1159.0, 753.0 ],
 		"bglocked" : 0,
 		"openinpresentation" : 0,
 		"default_fontsize" : 12.0,
@@ -39,6 +39,161 @@
 		"subpatcher_template" : "",
 		"assistshowspatchername" : 0,
 		"boxes" : [ 			{
+				"box" : 				{
+					"id" : "obj-8",
+					"maxclass" : "newobj",
+					"numinlets" : 0,
+					"numoutlets" : 1,
+					"outlettype" : [ "" ],
+					"patching_rect" : [ 1223.0, 458.0, 39.0, 22.0 ],
+					"text" : "r stop"
+				}
+
+			}
+, 			{
+				"box" : 				{
+					"id" : "obj-2",
+					"maxclass" : "newobj",
+					"numinlets" : 0,
+					"numoutlets" : 1,
+					"outlettype" : [ "" ],
+					"patching_rect" : [ 1120.0, 498.0, 39.0, 22.0 ],
+					"text" : "r start"
+				}
+
+			}
+, 			{
+				"box" : 				{
+					"id" : "obj-24",
+					"maxclass" : "newobj",
+					"numinlets" : 1,
+					"numoutlets" : 1,
+					"outlettype" : [ "" ],
+					"patching_rect" : [ 21.0, 163.0, 190.0, 22.0 ],
+					"text" : "loadmess open ./media/audio.wav"
+				}
+
+			}
+, 			{
+				"box" : 				{
+					"id" : "obj-23",
+					"maxclass" : "newobj",
+					"numinlets" : 2,
+					"numoutlets" : 2,
+					"outlettype" : [ "multichannelsignal", "bang" ],
+					"patching_rect" : [ 116.5, 216.0, 66.0, 22.0 ],
+					"text" : "mc.sfplay~"
+				}
+
+			}
+, 			{
+				"box" : 				{
+					"id" : "obj-21",
+					"maxclass" : "message",
+					"numinlets" : 2,
+					"numoutlets" : 1,
+					"outlettype" : [ "" ],
+					"patching_rect" : [ 495.0, 330.0, 31.0, 22.0 ],
+					"text" : "stop"
+				}
+
+			}
+, 			{
+				"box" : 				{
+					"id" : "obj-19",
+					"maxclass" : "message",
+					"numinlets" : 2,
+					"numoutlets" : 1,
+					"outlettype" : [ "" ],
+					"patching_rect" : [ 455.0, 330.0, 32.0, 22.0 ],
+					"text" : "start"
+				}
+
+			}
+, 			{
+				"box" : 				{
+					"id" : "obj-5",
+					"maxclass" : "newobj",
+					"numinlets" : 1,
+					"numoutlets" : 1,
+					"outlettype" : [ "" ],
+					"patching_rect" : [ 514.0, 348.0, 189.0, 22.0 ],
+					"text" : "loadmess read ./media/video.mp4"
+				}
+
+			}
+, 			{
+				"box" : 				{
+					"id" : "obj-1",
+					"maxclass" : "newobj",
+					"numinlets" : 1,
+					"numoutlets" : 2,
+					"outlettype" : [ "jit_matrix", "" ],
+					"patching_rect" : [ 423.0, 436.0, 143.0, 22.0 ],
+					"text" : "jit.movie @autostart false"
+				}
+
+			}
+, 			{
+				"box" : 				{
+					"id" : "obj-13",
+					"maxclass" : "newobj",
+					"numinlets" : 1,
+					"numoutlets" : 0,
+					"patching_rect" : [ 225.0, 254.0, 41.0, 22.0 ],
+					"text" : "s next"
+				}
+
+			}
+, 			{
+				"box" : 				{
+					"id" : "obj-11",
+					"maxclass" : "message",
+					"numinlets" : 2,
+					"numoutlets" : 1,
+					"outlettype" : [ "" ],
+					"patching_rect" : [ 1235.0, 503.0, 31.0, 22.0 ],
+					"text" : "stop"
+				}
+
+			}
+, 			{
+				"box" : 				{
+					"id" : "obj-6",
+					"linecount" : 3,
+					"maxclass" : "message",
+					"numinlets" : 2,
+					"numoutlets" : 1,
+					"outlettype" : [ "" ],
+					"patching_rect" : [ 1120.0, 549.0, 143.0, 50.0 ],
+					"text" : "write \"D:/Horse Project files/recordings/recording-1.mp4\""
+				}
+
+			}
+, 			{
+				"box" : 				{
+					"id" : "obj-4",
+					"maxclass" : "newobj",
+					"numinlets" : 1,
+					"numoutlets" : 2,
+					"outlettype" : [ "jit_matrix", "" ],
+					"patching_rect" : [ 1118.0, 615.0, 55.0, 22.0 ],
+					"text" : "jit.record"
+				}
+
+			}
+, 			{
+				"box" : 				{
+					"id" : "obj-3",
+					"maxclass" : "newobj",
+					"numinlets" : 1,
+					"numoutlets" : 0,
+					"patching_rect" : [ 116.5, 252.0, 54.0, 22.0 ],
+					"text" : "mc.dac~"
+				}
+
+			}
+, 			{
 				"box" : 				{
 					"id" : "obj-79",
 					"maxclass" : "message",
@@ -217,8 +372,8 @@
 					"numinlets" : 5,
 					"numoutlets" : 5,
 					"outlettype" : [ "", "", "", "", "" ],
-					"patching_rect" : [ 510.0, 647.0, 486.0, 22.0 ],
-					"text" : "route 0 1 2 3"
+					"patching_rect" : [ 510.0, 647.0, 481.666666666666629, 22.0 ],
+					"text" : "route 0 1 2 4"
 				}
 
 			}
@@ -268,11 +423,11 @@
 					"patching_rect" : [ 717.5, 54.0, 100.0, 40.0 ],
 					"preset_data" : [ 						{
 							"number" : 1,
-							"data" : [ 5, "obj-59", "toggle", "int", 1, 5, "obj-14", "jit.playlist", "preset_count", 1, 7, "obj-14", "jit.playlist", "preset_clipstate", 1, "filekind", "moviefile", 7, "obj-14", "jit.playlist", "preset_clipstate", 1, "absolutepath", "D:/horse_video.mp4", 7, "obj-14", "jit.playlist", "preset_clipstate", 1, "filename", "horse_video.mp4", 7, "obj-14", "jit.playlist", "preset_clipstate", 1, "loop", 1, 8, "obj-14", "jit.playlist", "preset_clipstate", 1, "selection", 0.0, 1.0, 7, "obj-14", "jit.playlist", "preset_clipstate", 1, "id", "u381002268", 7, "obj-14", "jit.playlist", "preset_content", 1, "loop", 1, 4, "obj-14", "jit.playlist", "preset_execute", 5, "obj-8", "playlist~", "preset_count", 1, 7, "obj-8", "playlist~", "preset_clipstate", 1, "filekind", "audiofile", 7, "obj-8", "playlist~", "preset_clipstate", 1, "absolutepath", "D:/unknown artist - test.wav", 7, "obj-8", "playlist~", "preset_clipstate", 1, "filename", "unknown artist - test.wav", 7, "obj-8", "playlist~", "preset_clipstate", 1, "loop", 0, 8, "obj-8", "playlist~", "preset_clipstate", 1, "selection", 0.0, 1.0, 7, "obj-8", "playlist~", "preset_clipstate", 1, "id", "u580002125", 4, "obj-8", "playlist~", "preset_execute", 151, "obj-22", "matrixctrl", "list", 0, 0, 0.0, 0, 1, 1.0, 0, 2, 0.0, 0, 3, 0.0, 0, 4, 0.0, 0, 5, 0.0, 0, 6, 0.0, 1, 0, 0.0, 1, 1, 0.0, 1, 2, 0.0, 1, 3, 0.0, 1, 4, 1.0, 1, 5, 0.0, 1, 6, 0.0, 2, 0, 0.0, 2, 1, 0.0, 2, 2, 0.0, 2, 3, 0.0, 2, 4, 0.0, 2, 5, 0.0, 2, 6, 0.0, 3, 0, 0.0, 3, 1, 0.0, 3, 2, 0.0, 3, 3, 0.0, 3, 4, 0.0, 3, 5, 0.0, 3, 6, 0.0, 4, 0, 0.0, 4, 1, 0.0, 4, 2, 0.0, 4, 3, 0.0, 4, 4, 0.0, 4, 5, 1.0, 4, 6, 0.0, 5, 0, 0.0, 5, 1, 0.0, 5, 2, 0.0, 5, 3, 0.0, 5, 4, 0.0, 5, 5, 0.0, 5, 6, 1.0, 6, 0, 0.0, 6, 1, 0.0, 6, 2, 0.0, 6, 3, 0.0, 6, 4, 0.0, 6, 5, 0.0, 6, 6, 0.0 ]
+							"data" : [ 5, "obj-59", "toggle", "int", 1, 5, "<invalid>", "jit.playlist", "preset_count", 1, 7, "<invalid>", "jit.playlist", "preset_clipstate", 1, "filekind", "moviefile", 7, "<invalid>", "jit.playlist", "preset_clipstate", 1, "absolutepath", "D:/horse_video.mp4", 7, "<invalid>", "jit.playlist", "preset_clipstate", 1, "filename", "horse_video.mp4", 7, "<invalid>", "jit.playlist", "preset_clipstate", 1, "loop", 1, 8, "<invalid>", "jit.playlist", "preset_clipstate", 1, "selection", 0.0, 1.0, 7, "<invalid>", "jit.playlist", "preset_clipstate", 1, "id", "u381002268", 7, "<invalid>", "jit.playlist", "preset_content", 1, "loop", 1, 4, "<invalid>", "jit.playlist", "preset_execute", 5, "<invalid>", "playlist~", "preset_count", 1, 7, "<invalid>", "playlist~", "preset_clipstate", 1, "filekind", "audiofile", 7, "<invalid>", "playlist~", "preset_clipstate", 1, "absolutepath", "D:/unknown artist - test.wav", 7, "<invalid>", "playlist~", "preset_clipstate", 1, "filename", "unknown artist - test.wav", 7, "<invalid>", "playlist~", "preset_clipstate", 1, "loop", 0, 8, "<invalid>", "playlist~", "preset_clipstate", 1, "selection", 0.0, 1.0, 7, "<invalid>", "playlist~", "preset_clipstate", 1, "id", "u580002125", 4, "<invalid>", "playlist~", "preset_execute", 151, "obj-22", "matrixctrl", "list", 0, 0, 0.0, 0, 1, 1.0, 0, 2, 0.0, 0, 3, 0.0, 0, 4, 0.0, 0, 5, 0.0, 0, 6, 0.0, 1, 0, 0.0, 1, 1, 0.0, 1, 2, 0.0, 1, 3, 0.0, 1, 4, 1.0, 1, 5, 0.0, 1, 6, 0.0, 2, 0, 0.0, 2, 1, 0.0, 2, 2, 0.0, 2, 3, 0.0, 2, 4, 0.0, 2, 5, 0.0, 2, 6, 0.0, 3, 0, 0.0, 3, 1, 0.0, 3, 2, 0.0, 3, 3, 0.0, 3, 4, 0.0, 3, 5, 0.0, 3, 6, 0.0, 4, 0, 0.0, 4, 1, 0.0, 4, 2, 0.0, 4, 3, 0.0, 4, 4, 0.0, 4, 5, 1.0, 4, 6, 0.0, 5, 0, 0.0, 5, 1, 0.0, 5, 2, 0.0, 5, 3, 0.0, 5, 4, 0.0, 5, 5, 0.0, 5, 6, 1.0, 6, 0, 0.0, 6, 1, 0.0, 6, 2, 0.0, 6, 3, 0.0, 6, 4, 0.0, 6, 5, 0.0, 6, 6, 0.0 ]
 						}
 , 						{
 							"number" : 2,
-							"data" : [ 5, "obj-59", "toggle", "int", 1, 5, "obj-14", "jit.playlist", "preset_count", 1, 7, "obj-14", "jit.playlist", "preset_clipstate", 1, "filekind", "moviefile", 7, "obj-14", "jit.playlist", "preset_clipstate", 1, "absolutepath", "D:/horse_video.mp4", 7, "obj-14", "jit.playlist", "preset_clipstate", 1, "filename", "horse_video.mp4", 7, "obj-14", "jit.playlist", "preset_clipstate", 1, "loop", 1, 8, "obj-14", "jit.playlist", "preset_clipstate", 1, "selection", 0.0, 1.0, 7, "obj-14", "jit.playlist", "preset_clipstate", 1, "id", "u381002268", 7, "obj-14", "jit.playlist", "preset_content", 1, "loop", 1, 4, "obj-14", "jit.playlist", "preset_execute", 5, "obj-8", "playlist~", "preset_count", 1, 7, "obj-8", "playlist~", "preset_clipstate", 1, "filekind", "audiofile", 7, "obj-8", "playlist~", "preset_clipstate", 1, "absolutepath", "D:/unknown artist - test.wav", 7, "obj-8", "playlist~", "preset_clipstate", 1, "filename", "unknown artist - test.wav", 7, "obj-8", "playlist~", "preset_clipstate", 1, "loop", 0, 8, "obj-8", "playlist~", "preset_clipstate", 1, "selection", 0.0, 1.0, 7, "obj-8", "playlist~", "preset_clipstate", 1, "id", "u580002125", 4, "obj-8", "playlist~", "preset_execute", 151, "obj-22", "matrixctrl", "list", 0, 0, 0.0, 0, 1, 1.0, 0, 2, 0.0, 0, 3, 0.0, 0, 4, 0.0, 0, 5, 0.0, 0, 6, 0.0, 1, 0, 0.0, 1, 1, 0.0, 1, 2, 1.0, 1, 3, 0.0, 1, 4, 0.0, 1, 5, 0.0, 1, 6, 0.0, 2, 0, 0.0, 2, 1, 0.0, 2, 2, 0.0, 2, 3, 1.0, 2, 4, 0.0, 2, 5, 0.0, 2, 6, 0.0, 3, 0, 0.0, 3, 1, 0.0, 3, 2, 0.0, 3, 3, 0.0, 3, 4, 0.0, 3, 5, 1.0, 3, 6, 0.0, 4, 0, 0.0, 4, 1, 0.0, 4, 2, 0.0, 4, 3, 0.0, 4, 4, 0.0, 4, 5, 0.0, 4, 6, 0.0, 5, 0, 0.0, 5, 1, 0.0, 5, 2, 0.0, 5, 3, 0.0, 5, 4, 0.0, 5, 5, 0.0, 5, 6, 1.0, 6, 0, 0.0, 6, 1, 0.0, 6, 2, 0.0, 6, 3, 0.0, 6, 4, 0.0, 6, 5, 0.0, 6, 6, 0.0 ]
+							"data" : [ 5, "obj-59", "toggle", "int", 1, 5, "<invalid>", "jit.playlist", "preset_count", 1, 7, "<invalid>", "jit.playlist", "preset_clipstate", 1, "filekind", "moviefile", 7, "<invalid>", "jit.playlist", "preset_clipstate", 1, "absolutepath", "D:/horse_video.mp4", 7, "<invalid>", "jit.playlist", "preset_clipstate", 1, "filename", "horse_video.mp4", 7, "<invalid>", "jit.playlist", "preset_clipstate", 1, "loop", 1, 8, "<invalid>", "jit.playlist", "preset_clipstate", 1, "selection", 0.0, 1.0, 7, "<invalid>", "jit.playlist", "preset_clipstate", 1, "id", "u381002268", 7, "<invalid>", "jit.playlist", "preset_content", 1, "loop", 1, 4, "<invalid>", "jit.playlist", "preset_execute", 5, "<invalid>", "playlist~", "preset_count", 1, 7, "<invalid>", "playlist~", "preset_clipstate", 1, "filekind", "audiofile", 7, "<invalid>", "playlist~", "preset_clipstate", 1, "absolutepath", "D:/unknown artist - test.wav", 7, "<invalid>", "playlist~", "preset_clipstate", 1, "filename", "unknown artist - test.wav", 7, "<invalid>", "playlist~", "preset_clipstate", 1, "loop", 0, 8, "<invalid>", "playlist~", "preset_clipstate", 1, "selection", 0.0, 1.0, 7, "<invalid>", "playlist~", "preset_clipstate", 1, "id", "u580002125", 4, "<invalid>", "playlist~", "preset_execute", 151, "obj-22", "matrixctrl", "list", 0, 0, 0.0, 0, 1, 1.0, 0, 2, 0.0, 0, 3, 0.0, 0, 4, 0.0, 0, 5, 0.0, 0, 6, 0.0, 1, 0, 0.0, 1, 1, 0.0, 1, 2, 1.0, 1, 3, 0.0, 1, 4, 0.0, 1, 5, 0.0, 1, 6, 0.0, 2, 0, 0.0, 2, 1, 0.0, 2, 2, 0.0, 2, 3, 1.0, 2, 4, 0.0, 2, 5, 0.0, 2, 6, 0.0, 3, 0, 0.0, 3, 1, 0.0, 3, 2, 0.0, 3, 3, 0.0, 3, 4, 0.0, 3, 5, 1.0, 3, 6, 0.0, 4, 0, 0.0, 4, 1, 0.0, 4, 2, 0.0, 4, 3, 0.0, 4, 4, 0.0, 4, 5, 0.0, 4, 6, 0.0, 5, 0, 0.0, 5, 1, 0.0, 5, 2, 0.0, 5, 3, 0.0, 5, 4, 0.0, 5, 5, 0.0, 5, 6, 1.0, 6, 0, 0.0, 6, 1, 0.0, 6, 2, 0.0, 6, 3, 0.0, 6, 4, 0.0, 6, 5, 0.0, 6, 6, 0.0 ]
 						}
  ]
 				}
@@ -2051,54 +2206,6 @@
 			}
 , 			{
 				"box" : 				{
-					"id" : "obj-9",
-					"maxclass" : "newobj",
-					"numinlets" : 2,
-					"numoutlets" : 0,
-					"patching_rect" : [ 124.0, 200.0, 35.0, 22.0 ],
-					"text" : "dac~"
-				}
-
-			}
-, 			{
-				"box" : 				{
-					"basictuning" : 440,
-					"data" : 					{
-						"clips" : [ 							{
-								"absolutepath" : "D:/unknown artist - test.wav",
-								"filename" : "unknown artist - test.wav",
-								"filekind" : "audiofile",
-								"id" : "u580002125",
-								"selection" : [ 0.0, 1.0 ],
-								"loop" : 0,
-								"content_state" : 								{
-
-								}
-
-							}
- ]
-					}
-,
-					"followglobaltempo" : 0,
-					"formantcorrection" : 0,
-					"id" : "obj-8",
-					"maxclass" : "playlist~",
-					"mode" : "basic",
-					"numinlets" : 1,
-					"numoutlets" : 5,
-					"originallength" : [ 0.0, "ticks" ],
-					"originaltempo" : 120.0,
-					"outlettype" : [ "signal", "signal", "signal", "", "dictionary" ],
-					"parameter_enable" : 0,
-					"patching_rect" : [ 124.0, 137.0, 150.0, 30.0 ],
-					"pitchcorrection" : 0,
-					"quality" : "basic",
-					"timestretch" : [ 0 ]
-				}
-
-			}
-, 			{
-				"box" : 				{
 					"id" : "obj-17",
 					"maxclass" : "newobj",
 					"numinlets" : 1,
@@ -2106,37 +2213,6 @@
 					"outlettype" : [ "jit_matrix", "bang", "" ],
 					"patching_rect" : [ 1010.0, 615.0, 89.0, 22.0 ],
 					"text" : "jit.world horsey"
-				}
-
-			}
-, 			{
-				"box" : 				{
-					"data" : 					{
-						"clips" : [ 							{
-								"absolutepath" : "D:/horse_video.mp4",
-								"filename" : "horse_video.mp4",
-								"filekind" : "moviefile",
-								"id" : "u381002268",
-								"selection" : [ 0.0, 1.0 ],
-								"loop" : 1,
-								"content_state" : 								{
-									"loop" : 1
-								}
-
-							}
- ]
-					}
-,
-					"drawto" : "",
-					"id" : "obj-14",
-					"loop" : 3,
-					"maxclass" : "jit.playlist",
-					"numinlets" : 1,
-					"numoutlets" : 3,
-					"outlettype" : [ "jit_matrix", "", "dictionary" ],
-					"output_texture" : 0,
-					"parameter_enable" : 0,
-					"patching_rect" : [ 502.0, 394.0, 150.0, 30.0 ]
 				}
 
 			}
@@ -2155,6 +2231,13 @@
  ],
 		"lines" : [ 			{
 				"patchline" : 				{
+					"destination" : [ "obj-18", 1 ],
+					"source" : [ "obj-1", 0 ]
+				}
+
+			}
+, 			{
+				"patchline" : 				{
 					"destination" : [ "obj-18", 5 ],
 					"source" : [ "obj-102", 0 ]
 				}
@@ -2169,6 +2252,13 @@
 			}
 , 			{
 				"patchline" : 				{
+					"destination" : [ "obj-4", 0 ],
+					"source" : [ "obj-11", 0 ]
+				}
+
+			}
+, 			{
+				"patchline" : 				{
 					"destination" : [ "obj-18", 4 ],
 					"source" : [ "obj-116", 0 ]
 				}
@@ -2176,7 +2266,7 @@
 			}
 , 			{
 				"patchline" : 				{
-					"destination" : [ "obj-14", 0 ],
+					"destination" : [ "obj-19", 0 ],
 					"order" : 0,
 					"source" : [ "obj-12", 0 ]
 				}
@@ -2184,7 +2274,7 @@
 			}
 , 			{
 				"patchline" : 				{
-					"destination" : [ "obj-8", 0 ],
+					"destination" : [ "obj-23", 0 ],
 					"order" : 1,
 					"source" : [ "obj-12", 0 ]
 				}
@@ -2227,13 +2317,6 @@
 			}
 , 			{
 				"patchline" : 				{
-					"destination" : [ "obj-18", 1 ],
-					"source" : [ "obj-14", 0 ]
-				}
-
-			}
-, 			{
-				"patchline" : 				{
 					"destination" : [ "obj-138", 0 ],
 					"order" : 0,
 					"source" : [ "obj-140", 0 ]
@@ -2264,7 +2347,7 @@
 			}
 , 			{
 				"patchline" : 				{
-					"destination" : [ "obj-14", 0 ],
+					"destination" : [ "obj-21", 0 ],
 					"order" : 0,
 					"source" : [ "obj-147", 0 ]
 				}
@@ -2272,7 +2355,7 @@
 			}
 , 			{
 				"patchline" : 				{
-					"destination" : [ "obj-8", 0 ],
+					"destination" : [ "obj-23", 0 ],
 					"order" : 1,
 					"source" : [ "obj-147", 0 ]
 				}
@@ -2316,7 +2399,37 @@
 , 			{
 				"patchline" : 				{
 					"destination" : [ "obj-17", 0 ],
+					"order" : 1,
 					"source" : [ "obj-18", 7 ]
+				}
+
+			}
+, 			{
+				"patchline" : 				{
+					"destination" : [ "obj-4", 0 ],
+					"order" : 0,
+					"source" : [ "obj-18", 7 ]
+				}
+
+			}
+, 			{
+				"patchline" : 				{
+					"destination" : [ "obj-1", 0 ],
+					"source" : [ "obj-19", 0 ]
+				}
+
+			}
+, 			{
+				"patchline" : 				{
+					"destination" : [ "obj-6", 0 ],
+					"source" : [ "obj-2", 0 ]
+				}
+
+			}
+, 			{
+				"patchline" : 				{
+					"destination" : [ "obj-1", 0 ],
+					"source" : [ "obj-21", 0 ]
 				}
 
 			}
@@ -2324,6 +2437,27 @@
 				"patchline" : 				{
 					"destination" : [ "obj-18", 0 ],
 					"source" : [ "obj-22", 0 ]
+				}
+
+			}
+, 			{
+				"patchline" : 				{
+					"destination" : [ "obj-13", 0 ],
+					"source" : [ "obj-23", 1 ]
+				}
+
+			}
+, 			{
+				"patchline" : 				{
+					"destination" : [ "obj-3", 0 ],
+					"source" : [ "obj-23", 0 ]
+				}
+
+			}
+, 			{
+				"patchline" : 				{
+					"destination" : [ "obj-23", 0 ],
+					"source" : [ "obj-24", 0 ]
 				}
 
 			}
@@ -2345,6 +2479,13 @@
 				"patchline" : 				{
 					"destination" : [ "obj-51", 0 ],
 					"source" : [ "obj-49", 0 ]
+				}
+
+			}
+, 			{
+				"patchline" : 				{
+					"destination" : [ "obj-1", 0 ],
+					"source" : [ "obj-5", 0 ]
 				}
 
 			}
@@ -2417,6 +2558,13 @@
 			}
 , 			{
 				"patchline" : 				{
+					"destination" : [ "obj-4", 0 ],
+					"source" : [ "obj-6", 0 ]
+				}
+
+			}
+, 			{
+				"patchline" : 				{
 					"destination" : [ "obj-51", 0 ],
 					"source" : [ "obj-60", 0 ]
 				}
@@ -2483,36 +2631,15 @@
 			}
 , 			{
 				"patchline" : 				{
-					"destination" : [ "obj-9", 1 ],
-					"source" : [ "obj-8", 1 ]
-				}
-
-			}
-, 			{
-				"patchline" : 				{
-					"destination" : [ "obj-9", 0 ],
+					"destination" : [ "obj-11", 0 ],
 					"source" : [ "obj-8", 0 ]
 				}
 
 			}
  ],
 		"dependency_cache" : [ 			{
-				"name" : "horse_video.mp4",
-				"bootpath" : "D:/",
-				"patcherrelativepath" : "..",
-				"type" : "mpg4",
-				"implicit" : 1
-			}
-, 			{
 				"name" : "jit.*.mxe64",
 				"type" : "mx64"
-			}
-, 			{
-				"name" : "unknown artist - test.wav",
-				"bootpath" : "D:/",
-				"patcherrelativepath" : "..",
-				"type" : "WAVE",
-				"implicit" : 1
 			}
  ],
 		"autosave" : 0
