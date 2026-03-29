@@ -1,6 +1,6 @@
 (s.options.memSize = 8192 * 100;
 s.options.numWireBufs = 1024;
-s.options.numOutputBusChannels = 2;
+s.options.numOutputBusChannels = 8;
 Server.supernova;
 s.reboot;
 MIDIIn.connectAll;
@@ -124,21 +124,23 @@ s.waitForBoot {
 )
 (
 ~config = (
-	sinHitPanRange: 0.125
+	sinHitPanRange: 0.125,
+	reverbSend: 0.5
 );
 // This is a 8 x 8 map from [36..99]
 ~nnMap = (
-	// Row 1
+	// Column 1
 	92: { ~routines.longIntro.play; },
 	84: { ~routinesattackFromEverywhere.play; },
-	76: {
+	76: { | velocity |
 		Synth(\normalizedVocoder, [
 			\bufnum, ~samples.whatami,
 			\freqRatio, 0.6,
 			\freq, 100,
 			\convolutionBuffer, ~convolutionBuffers.choose,
-			\reverbSend, 0.2,
+			\reverbSend, ~config.reverbSend,
 			\reverbBus, ~busses.reverb,
+			\amp, 0.2 * velocity / 127,
 			\pan, 0,
 			\oscDefect, 0.1
 		], ~parGroup);
@@ -193,7 +195,8 @@ s.waitForBoot {
 			\freqRatio, 0.6,
 			\freq, [50, 100, 150, 200, 250, 300].choose,
 			\convolutionBuffer, ~convolutionBuffers.choose,
-			\reverbSend, 0.2,
+			\reverbBus, ~busses.reverb,
+			\reverbSend, ~config.reverbSend,
 			\pan, rrand(~config.sinHitPanRange.neg, ~config.sinHitPanRange),
 			\oscDefect, 0.1,
 			\amp, 0.2 * vel / 127
@@ -205,7 +208,7 @@ s.waitForBoot {
 			\freqRatio, 0.6,
 			\freq, [50, 100, 150, 200, 250, 300].choose + 600,
 			\convolutionBuffer, ~convolutionBuffers.choose,
-			\reverbSend, 0.2,
+			\reverbSend, ~config.reverbSend,
 			\reverbBus, ~busses.reverb,
 			\pan, rrand(~config.sinHitPanRange.neg, ~config.sinHitPanRange),
 			\oscDefect, 0.1,
@@ -218,7 +221,7 @@ s.waitForBoot {
 			\freqRatio, 0.6,
 			\freq, [50, 100, 150, 200, 250, 300].choose + 1200,
 			\convolutionBuffer, ~convolutionBuffers.choose,
-			\reverbSend, 0.2,
+			\reverbSend, ~config.reverbSend,
 			\reverbBus, ~busses.reverb,
 			\pan, rrand(~config.sinHitPanRange.neg, ~config.sinHitPanRange),
 			\oscDefect, 0.1,
@@ -231,7 +234,7 @@ s.waitForBoot {
 			\freqRatio, 0.6,
 			\freq, [50, 100, 150, 200, 250, 300].choose + 1800,
 			\convolutionBuffer, ~convolutionBuffers.choose,
-			\reverbSend, 0.2,
+			\reverbSend, ~config.reverbSend,
 			\reverbBus, ~busses.reverb,
 			\pan, rrand(~config.sinHitPanRange.neg, ~config.sinHitPanRange),
 			\oscDefect, 0.1,
@@ -244,7 +247,7 @@ s.waitForBoot {
 			\freqRatio, 0.6,
 			\freq, [50, 100, 150, 200, 250, 300].choose + 2400,
 			\convolutionBuffer, ~convolutionBuffers.choose,
-			\reverbSend, 0.2,
+			\reverbSend, ~config.reverbSend,
 			\reverbBus, ~busses.reverb,
 			\pan, rrand(~config.sinHitPanRange.neg, ~config.sinHitPanRange),
 			\oscDefect, 0.1,
@@ -257,7 +260,7 @@ s.waitForBoot {
 			\freqRatio, 0.6,
 			\freq, [50, 100, 150, 200, 250, 300].choose + 3000,
 			\convolutionBuffer, ~convolutionBuffers.choose,
-			\reverbSend, 0.2,
+			\reverbSend, ~config.reverbSend,
 			\reverbBus, ~busses.reverb,
 			\pan, rrand(~config.sinHitPanRange.neg, ~config.sinHitPanRange),
 			\oscDefect, 0.1,
@@ -270,7 +273,7 @@ s.waitForBoot {
 			\freqRatio, 0.6,
 			\freq, [50, 100, 150, 200, 250, 300].choose + 3600,
 			\convolutionBuffer, ~convolutionBuffers.choose,
-			\reverbSend, 0.2,
+			\reverbSend, ~config.reverbSend,
 			\reverbBus, ~busses.reverb,
 			\pan, rrand(~config.sinHitPanRange.neg, ~config.sinHitPanRange),
 			\oscDefect, 0.1,
@@ -283,7 +286,7 @@ s.waitForBoot {
 			\freqRatio, 0.6,
 			\freq, [50, 100, 150, 200, 250, 300].choose + 4200,
 			\convolutionBuffer, ~convolutionBuffers.choose,
-			\reverbSend, 0.2,
+			\reverbSend, ~config.reverbSend,
 			\reverbBus, ~busses.reverb,
 			\pan, rrand(~config.sinHitPanRange.neg, ~config.sinHitPanRange),
 			\oscDefect, 0.1,
@@ -297,7 +300,7 @@ s.waitForBoot {
 			\freqRatio, 0.6,
 			\freq, [50, 100, 150, 200, 250, 300].choose,
 			\convolutionBuffer, ~convolutionBuffers.choose,
-			\reverbSend, 0.2,
+			\reverbSend, ~config.reverbSend,
 			\reverbBus, ~busses.reverb,
 			\pan, rrand(-1.0, 1),
 			\oscDefect, 0.1,
@@ -310,7 +313,7 @@ s.waitForBoot {
 			\freqRatio, 0.6,
 			\freq, [50, 100, 150, 200, 250, 300].choose + 600,
 			\convolutionBuffer, ~convolutionBuffers.choose,
-			\reverbSend, 0.2,
+			\reverbSend, ~config.reverbSend,
 			\reverbBus, ~busses.reverb,
 			\pan, rrand(-1.0, 1),
 			\oscDefect, 0.1,
@@ -323,7 +326,7 @@ s.waitForBoot {
 			\freqRatio, 0.6,
 			\freq, [50, 100, 150, 200, 250, 300].choose + 1200,
 			\convolutionBuffer, ~convolutionBuffers.choose,
-			\reverbSend, 0.2,
+			\reverbSend, ~config.reverbSend,
 			\reverbBus, ~busses.reverb,
 			\pan, rrand(-1.0, 1),
 			\oscDefect, 0.1,
@@ -336,7 +339,7 @@ s.waitForBoot {
 			\freqRatio, 0.6,
 			\freq, [50, 100, 150, 200, 250, 300].choose + 1800,
 			\convolutionBuffer, ~convolutionBuffers.choose,
-			\reverbSend, 0.2,
+			\reverbSend, ~config.reverbSend,
 			\reverbBus, ~busses.reverb,
 			\pan, rrand(-1.0, 1),
 			\oscDefect, 0.1,
@@ -349,7 +352,7 @@ s.waitForBoot {
 			\freqRatio, 0.6,
 			\freq, [50, 100, 150, 200, 250, 300].choose + 2400,
 			\convolutionBuffer, ~convolutionBuffers.choose,
-			\reverbSend, 0.2,
+			\reverbSend, ~config.reverbSend,
 			\reverbBus, ~busses.reverb,
 			\pan, rrand(-1.0, 1),
 			\oscDefect, 0.1,
@@ -362,7 +365,7 @@ s.waitForBoot {
 			\freqRatio, 0.6,
 			\freq, [50, 100, 150, 200, 250, 300].choose + 3000,
 			\convolutionBuffer, ~convolutionBuffers.choose,
-			\reverbSend, 0.2,
+			\reverbSend, ~config.reverbSend,
 			\reverbBus, ~busses.reverb,
 			\pan, rrand(-1.0, 1),
 			\oscDefect, 0.1,
@@ -375,7 +378,7 @@ s.waitForBoot {
 			\freqRatio, 0.6,
 			\freq, [50, 100, 150, 200, 250, 300].choose + 3000,
 			\convolutionBuffer, ~convolutionBuffers.choose,
-			\reverbSend, 0.2,
+			\reverbSend, ~config.reverbSend,
 			\reverbBus, ~busses.reverb,
 			\pan, rrand(-1.0, 1),
 			\oscDefect, 0.1,
@@ -388,7 +391,7 @@ s.waitForBoot {
 			\freqRatio, 0.6,
 			\freq, [50, 100, 150, 200, 250, 300].choose + 3600,
 			\convolutionBuffer, ~convolutionBuffers.choose,
-			\reverbSend, 0.2,
+			\reverbSend, ~config.reverbSend,
 			\reverbBus, ~busses.reverb,
 			\pan, rrand(-1.0, 1),
 			\oscDefect, 0.1,
