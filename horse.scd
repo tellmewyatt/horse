@@ -1,6 +1,7 @@
 (s.options.memSize = 8192 * 100;
 s.options.numWireBufs = 1024;
 s.options.numOutputBusChannels = 8;
+s.options.hardwareBufferSize = 512;
 Server.supernova;
 s.reboot;
 MIDIIn.connectAll;
@@ -120,15 +121,15 @@ s.waitForBoot {
 	Pbindef(\horseGallops).stop;
 	Pbindef(\horseNeighs).stop;
 	~routines.attackFromEverywhere.play;
-}
-)
-(
+};
 ~config = (
 	sinHitPanRange: 0.125,
-	reverbSend: 0.5
+	reverbSend: 0.5,
+	bassAmp: 0.4,
 );
 // This is a 8 x 8 map from [36..99]
-~nnMap = (
+~noteOffMap = ();
+~noteOnMap = (
 	// Column 1
 	92: { ~routines.longIntro.play; },
 	84: { ~routinesattackFromEverywhere.play; },
@@ -140,7 +141,7 @@ s.waitForBoot {
 			\convolutionBuffer, ~convolutionBuffers.choose,
 			\reverbSend, ~config.reverbSend,
 			\reverbBus, ~busses.reverb,
-			\amp, 0.2 * velocity / 127,
+			\amp, 0.2 * velocity,
 			\pan, 0,
 			\oscDefect, 0.1
 		], ~parGroup);
@@ -171,10 +172,10 @@ s.waitForBoot {
 		]);
 	},
 	52: { | velocity |
-		Synth(\percussiveNoise, [\bufnum, ~convolutionBuffers.choose, \amp, 0.1 * velocity / 127, \release, 0.2 * velocity / 127], ~parGroup);
+		Synth(\percussiveNoise, [\bufnum, ~convolutionBuffers.choose, \amp, 0.1 * velocity, \release, 0.2 * velocity], ~parGroup);
 	},
 	44: { | velocity |
-		Synth(\bassDrum, [\amp, velocity / 127 * 0.5, \releaseTime, 4]);
+		Synth(\bassDrum, [\amp, velocity * 0.5, \releaseTime, 4]);
 	},
 	36: { | velocity |
 		var createSynth = {
@@ -199,7 +200,7 @@ s.waitForBoot {
 			\reverbSend, ~config.reverbSend,
 			\pan, rrand(~config.sinHitPanRange.neg, ~config.sinHitPanRange),
 			\oscDefect, 0.1,
-			\amp, 0.2 * vel / 127
+			\amp, 0.2 * vel
 		], ~parGroup);
 	},
 	45: { | vel |
@@ -212,7 +213,7 @@ s.waitForBoot {
 			\reverbBus, ~busses.reverb,
 			\pan, rrand(~config.sinHitPanRange.neg, ~config.sinHitPanRange),
 			\oscDefect, 0.1,
-			\amp, 0.2 * vel / 127
+			\amp, 0.2 * vel
 		], ~parGroup);
 	},
 	53: { | vel |
@@ -225,7 +226,7 @@ s.waitForBoot {
 			\reverbBus, ~busses.reverb,
 			\pan, rrand(~config.sinHitPanRange.neg, ~config.sinHitPanRange),
 			\oscDefect, 0.1,
-			\amp, 0.2 * vel / 127
+			\amp, 0.2 * vel
 		], ~parGroup);
 	},
 	61: { | vel |
@@ -238,7 +239,7 @@ s.waitForBoot {
 			\reverbBus, ~busses.reverb,
 			\pan, rrand(~config.sinHitPanRange.neg, ~config.sinHitPanRange),
 			\oscDefect, 0.1,
-			\amp, 0.2 * vel / 127
+			\amp, 0.2 * vel
 		], ~parGroup);
 	},
 	69: { | vel |
@@ -251,7 +252,7 @@ s.waitForBoot {
 			\reverbBus, ~busses.reverb,
 			\pan, rrand(~config.sinHitPanRange.neg, ~config.sinHitPanRange),
 			\oscDefect, 0.1,
-			\amp, 0.2 * vel / 127
+			\amp, 0.2 * vel
 		], ~parGroup);
 	},
 	77: { | vel |
@@ -264,7 +265,7 @@ s.waitForBoot {
 			\reverbBus, ~busses.reverb,
 			\pan, rrand(~config.sinHitPanRange.neg, ~config.sinHitPanRange),
 			\oscDefect, 0.1,
-			\amp, 0.2 * vel / 127
+			\amp, 0.2 * vel
 		], ~parGroup);
 	},
 	85: { | vel |
@@ -277,7 +278,7 @@ s.waitForBoot {
 			\reverbBus, ~busses.reverb,
 			\pan, rrand(~config.sinHitPanRange.neg, ~config.sinHitPanRange),
 			\oscDefect, 0.1,
-			\amp, 0.2 * vel / 127
+			\amp, 0.2 * vel
 		], ~parGroup);
 	},
 	93: { | vel |
@@ -290,7 +291,7 @@ s.waitForBoot {
 			\reverbBus, ~busses.reverb,
 			\pan, rrand(~config.sinHitPanRange.neg, ~config.sinHitPanRange),
 			\oscDefect, 0.1,
-			\amp, 0.2 * vel / 127
+			\amp, 0.2 * vel
 		], ~parGroup);
 	},
 	// 3rd Column
@@ -304,7 +305,7 @@ s.waitForBoot {
 			\reverbBus, ~busses.reverb,
 			\pan, rrand(-1.0, 1),
 			\oscDefect, 0.1,
-			\amp, 0.2 * vel / 127
+			\amp, 0.2 * vel
 		], ~parGroup);
 	},
 	46: { | vel |
@@ -317,7 +318,7 @@ s.waitForBoot {
 			\reverbBus, ~busses.reverb,
 			\pan, rrand(-1.0, 1),
 			\oscDefect, 0.1,
-			\amp, 0.2 * vel / 127
+			\amp, 0.2 * vel
 		], ~parGroup);
 	},
 	54: { | vel |
@@ -330,7 +331,7 @@ s.waitForBoot {
 			\reverbBus, ~busses.reverb,
 			\pan, rrand(-1.0, 1),
 			\oscDefect, 0.1,
-			\amp, 0.2 * vel / 127
+			\amp, 0.2 * vel
 		], ~parGroup);
 	},
 	62: { | vel |
@@ -343,7 +344,7 @@ s.waitForBoot {
 			\reverbBus, ~busses.reverb,
 			\pan, rrand(-1.0, 1),
 			\oscDefect, 0.1,
-			\amp, 0.2 * vel / 127
+			\amp, 0.2 * vel
 		], ~parGroup);
 	},
 	70: { | vel |
@@ -356,7 +357,7 @@ s.waitForBoot {
 			\reverbBus, ~busses.reverb,
 			\pan, rrand(-1.0, 1),
 			\oscDefect, 0.1,
-			\amp, 0.2 * vel / 127
+			\amp, 0.2 * vel
 		], ~parGroup);
 	},
 	78: { | vel |
@@ -369,7 +370,7 @@ s.waitForBoot {
 			\reverbBus, ~busses.reverb,
 			\pan, rrand(-1.0, 1),
 			\oscDefect, 0.1,
-			\amp, 0.2 * vel / 127
+			\amp, 0.2 * vel
 		], ~parGroup);
 	},
 	86: { | vel |
@@ -382,7 +383,7 @@ s.waitForBoot {
 			\reverbBus, ~busses.reverb,
 			\pan, rrand(-1.0, 1),
 			\oscDefect, 0.1,
-			\amp, 0.2 * vel / 127
+			\amp, 0.2 * vel
 		], ~parGroup);
 	},
 	94: { | vel |
@@ -395,15 +396,49 @@ s.waitForBoot {
 			\reverbBus, ~busses.reverb,
 			\pan, rrand(-1.0, 1),
 			\oscDefect, 0.1,
-			\amp, 0.2 * vel / 127
+			\amp, 0.2 * vel
 		], ~parGroup);
+	},
+	// Row 4
+	95: { | vel |
+		~noteOffMap[95] = Synth(\bouncyBass, [\freq, 60.midicps, \amp, ~config.bassAmp * vel]);
+	},
+	87: { | vel |
+		~noteOffMap[87] = Synth(\bouncyBass, [\freq, 55.midicps, \amp, ~config.bassAmp * vel]);
+	},
+	79: { | vel |
+		~noteOffMap[79] = Synth(\bouncyBass, [\freq, 50.midicps, \amp, ~config.bassAmp * vel]);
+	},
+	71: { | vel |
+		~noteOffMap[71] = Synth(\bouncyBass, [\freq, 45.midicps, \amp, ~config.bassAmp * vel]);
+	},
+	63: { | vel |
+		~noteOffMap[63] = Synth(\bouncyBass, [\freq, 40.midicps, \amp, ~config.bassAmp * vel]);
+	},
+	55: { | vel |
+		~noteOffMap[55] = Synth(\bouncyBass, [\freq, 35.midicps, \amp, ~config.bassAmp * vel]);
+	},
+	47: { | vel |
+		~noteOffMap[47] = Synth(\bouncyBass, [\freq, 30.midicps, \amp, ~config.bassAmp * vel]);
+	},
+	39: { | vel |
+		~noteOffMap[39] = Synth(\bouncyBass, [\freq, 25.midicps, \amp, ~config.bassAmp * vel]);
 	}
+
 );
-MIDIdef.noteOn(\test, { arg ...args;
+MIDIdef.noteOn(\noteOns, { arg ...args;
 	var nn = args[1];
 	var vel = args[0];
 	[nn, vel].postln;
 	nn.postln;
-	~nnMap[nn].(vel);
-});)
+	~noteOnMap[nn].(vel / 127);
+});
+MIDIdef.noteOff(\noteOffs, { arg ...args;
+	var nn = args[1];
+	var vel = args[0];
+	nn.postln;
+	~noteOffMap[nn].release;
+});
+)
 ~routines.longIntro.play;
+Synth(\bouncyBass)

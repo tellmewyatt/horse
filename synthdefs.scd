@@ -161,5 +161,10 @@ SynthDef(\reverb, { | in, out=0, room=1, damp=0.5, amp=1 |
 		)
 	);
 }).add;
-
-		
+SynthDef(\bouncyBass, { | out = 0, freq = 60, gate = 1, amp = 0.1, pan=0.25 |
+	var env = EnvGen.kr(Env.asr(0, 1, 0), gate, doneAction: 2);
+	var bounceEnv = LPF.ar(LFPulse.ar(EnvGen.ar(Env([20, 0], [0.5]), gate)), 600);
+	var modEnv = EnvGen.kr(Env([0, 1, 0], [0.2, 0.1]), gate);
+	var sig = bounceEnv * SinOsc.ar(freq + SinOsc.ar(freq * 2, 0, modEnv * (freq * 10), freq)) * 0.2 * env;
+	Out.ar(out, ~panEvenly.(sig * amp, pan));
+}).add;
