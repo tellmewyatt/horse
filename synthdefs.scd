@@ -168,3 +168,11 @@ SynthDef(\bouncyBass, { | out = 0, freq = 60, gate = 1, amp = 0.1, pan=0.25 |
 	var sig = bounceEnv * SinOsc.ar(freq + SinOsc.ar(freq * 2, 0, modEnv * (freq * 10), freq)) * 0.2 * env;
 	Out.ar(out, ~panEvenly.(sig * amp, pan));
 }).add;
+SynthDef(\crazyFall, { | out = 0, dur=1, amp=0.1, pan=0, spread=0.5 |
+	var openEnv = EnvGen.kr(Env.step([1,0], [dur,0]), 1);
+	var sig = StandardL.ar(Line.kr(SampleRate.ir, 1000, dur)) * amp * openEnv * 0.5;
+	sig = [CombC.ar(sig, 1, 0.2, 1), CombC.ar(sig, 1, 0.3, 1)];
+	sig = Limiter.ar(sig, amp);
+	sig = ~panEvenly.(sig, pan, 2, spread);
+	Out.ar(out, sig);
+}).add;

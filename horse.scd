@@ -401,7 +401,7 @@ s.waitForBoot {
 	},
 	// Row 4
 	95: { | vel |
-		~noteOffMap[95] = Synth(\bouncyBass, [\freq, 60.midicps, \amp, ~config.bassAmp * vel]);
+		Synth(\crazyFall, [\dur, 10, \amp, 0.1, \pan, rrand(-1.0, 1)]);
 	},
 	87: { | vel |
 		~noteOffMap[87] = Synth(\bouncyBass, [\freq, 55.midicps, \amp, ~config.bassAmp * vel]);
