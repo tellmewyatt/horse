@@ -168,11 +168,43 @@ SynthDef(\bouncyBass, { | out = 0, freq = 60, gate = 1, amp = 0.1, pan=0.25 |
 	var sig = bounceEnv * SinOsc.ar(freq + SinOsc.ar(freq * 2, 0, modEnv * (freq * 10), freq)) * 0.2 * env;
 	Out.ar(out, ~panEvenly.(sig * amp, pan));
 }).add;
-SynthDef(\crazyFall, { | out = 0, dur=1, amp=0.1, pan=0, spread=0.5 |
+SynthDef(\crazyFall, { | out = 0, dur=1, amp=0.1, pan=0, spread=0.5, startFreq=20000, endFreq=1000 |
 	var openEnv = EnvGen.kr(Env.step([1,0], [dur,0]), 1);
-	var sig = StandardL.ar(Line.kr(SampleRate.ir, 1000, dur)) * amp * openEnv * 0.5;
+	var env = EnvGen.kr(Env([0,1,1,0], [0, dur, dur+1]), 1, doneAction: 2);
+	var sig = StandardL.ar(Line.kr(startFreq, endFreq, dur), Rand(1.0, 1.1)) * amp * openEnv * 0.5;
 	sig = [CombC.ar(sig, 1, 0.2, 1), CombC.ar(sig, 1, 0.3, 1)];
-	sig = Limiter.ar(sig, amp);
+	sig = Limiter.ar(sig * env, amp);
 	sig = ~panEvenly.(sig, pan, 2, spread);
 	Out.ar(out, sig);
+}).add;
+SynthDef(\noisyCross, { | out = 0, amp = 0.2, bufnum, gate=1 |
+	var modulator, trig, sig, pan, env;
+	env = EnvGen.kr(Env.asr(0.001, 1, 0.001), gate, doneAction: 2);
+	pan = LFNoise2.kr(1);
+	modulator = StandardL.ar(LFNoise1.ar(0.1).range(100, 6000), 1.2);
+	trig = Dust.ar(40);
+	sig = GrainBuf.ar(1, trig, 0.5, bufnum, TRand.kr(0.9, 1.1, trig) * BufRateScale.kr(bufnum), LFNoise2.ar(0.2).range(0, 0.9));
+	sig = sig * modulator + sig;
+	sig = sig * amp;
+	sig = DelayN.ar(sig, 0.3, Rand(0.1, 0.3 ! 4));
+	sig = sig * env;
+	Out.ar(
+		out,
+		~panEvenly.(Limiter.ar(sig, 0.5), pan, 2, 0.5)
+	);
+}).add;
+SynthDef(\noisyCrossControlled, { | out = 0, amp = 0.2, bufnum, gate=1, pan=0, pos=0 |
+	var modulator, trig, sig, env;
+	env = EnvGen.kr(Env.asr(0.001, 1, 0.001), gate, doneAction: 2);
+	modulator = StandardL.ar(LFNoise1.ar(0.1).range(100, 6000), 1.2);
+	trig = Dust.ar(40);
+	sig = GrainBuf.ar(1, trig, 0.5, bufnum, TRand.kr(0.9, 1.1, trig) * BufRateScale.kr(bufnum), pos);
+	sig = sig * modulator + sig;
+	sig = sig * amp;
+	sig = DelayN.ar(sig, 0.3, Rand(0.1, 0.3 ! 4));
+	sig = sig * env;
+	Out.ar(
+		out,
+		~panEvenly.(Limiter.ar(sig, 0.5), pan, 2, 0.5)
+	);
 }).add;

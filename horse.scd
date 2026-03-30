@@ -401,16 +401,16 @@ s.waitForBoot {
 	},
 	// Row 4
 	95: { | vel |
-		Synth(\crazyFall, [\dur, 10, \amp, 0.1, \pan, rrand(-1.0, 1)]);
+		Synth(\crazyFall, [\dur, 10, \amp, 0.1, \pan, rrand(-1.0, 1), \startFreq, s.sampleRate]);
 	},
 	87: { | vel |
-		~noteOffMap[87] = Synth(\bouncyBass, [\freq, 55.midicps, \amp, ~config.bassAmp * vel]);
+		Synth(\crazyFall, [\dur, 10, \amp, 0.1, \pan, rrand(-1.0, 1), \startFreq, 1000, \endFreq, 20000]);
 	},
 	79: { | vel |
-		~noteOffMap[79] = Synth(\bouncyBass, [\freq, 50.midicps, \amp, ~config.bassAmp * vel]);
+		~noteOffMap[79] = Synth(\noisyCross, [\bufnum, ~samples.neighs.choose, \amp, 0.2]);
 	},
 	71: { | vel |
-		~noteOffMap[71] = Synth(\bouncyBass, [\freq, 45.midicps, \amp, ~config.bassAmp * vel]);
+		~noteOffMap[71] = Synth(\noisyCross, [\bufnum, ~samples.gallopsL, \amp, 0.5]);
 	},
 	63: { | vel |
 		~noteOffMap[63] = Synth(\bouncyBass, [\freq, 40.midicps, \amp, ~config.bassAmp * vel]);
