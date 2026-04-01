@@ -1,7 +1,7 @@
 (s.options.memSize = 8192 * 100;
 s.options.numWireBufs = 1024;
 s.options.numOutputBusChannels = 8;
-s.options.hardwareBufferSize = 512;
+s.options.hardwareBufferSize = 1024;
 Server.supernova;
 s.reboot;
 MIDIIn.connectAll;
@@ -443,6 +443,28 @@ s.waitForBoot {
 	},
 	39: { | vel |
 		~noteOffMap[39] = Synth(\bouncyBass, [\freq, 25.midicps, \amp, ~config.bassAmp * vel]);
+	},
+	// Row 5
+	40: { | vel |
+		~noteOffMap[40] = Synth(\sinPulse, [\freq, 200]);
+	},
+	48: { | vel |
+		~noteOffMap[48] = Synth(\sinPulse, [\freq, 300]);
+	},
+	56: { | vel |
+		~noteOffMap[56] = Synth(\sinPulse, [\freq, 350]);
+	},
+	64: { | vel |
+		~noteOffMap[64] = Synth(\sinPulse, [\freq, 266]);
+	},
+	72: { | vel |
+		~noteOffMap[72] = Synth(\sinPulse, [\freq, 295]);
+	},
+	80: { | vel |
+		~noteOffMap[80] = Synth(\sinPulse, [\freq, 400]);
+	},
+	88: { | vel |
+		~noteOffMap[88] = Synth(\sinPulse, [\freq, 420]);
 	}
 
 );

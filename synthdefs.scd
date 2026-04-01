@@ -208,3 +208,8 @@ SynthDef(\noisyCrossControlled, { | out = 0, amp = 0.2, bufnum, gate=1, pan=0, p
 		~panEvenly.(Limiter.ar(sig, 0.5), pan, 2, 0.5)
 	);
 }).add;
+SynthDef(\sinPulse, { | freq=200, gate=1, out = 0 , amp=0.1, pan=0 |
+	var env = EnvGen.kr(Env.asr(0.01, 1, 0.01), gate, doneAction: 2);
+	var sig = LPF.ar(LFPulse.ar(2).range(0.5,1), 1000) * SinOsc.ar(freq, 0) * amp * env;
+	Out.ar(out, ~panEvenly.(sig, pan));
+}).add;

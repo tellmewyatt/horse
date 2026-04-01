@@ -184,7 +184,6 @@
                     "numoutlets": 1,
                     "outlettype": [ "" ],
                     "patching_rect": [ 582.0, 427.0, 119.0, 22.0 ],
-                    "presentation_linecount": 3,
                     "text": "1. 0 $1 1000 1. 1000"
                 }
             },
