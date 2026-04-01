@@ -5,6 +5,7 @@ s.options.hardwareBufferSize = 512;
 Server.supernova;
 s.reboot;
 MIDIIn.connectAll;
+~maxOsc = NetAddr.new("127.0.0.1", 5000);
 s.waitForBoot {
 	// Run the setup
 	r {
@@ -174,8 +175,9 @@ s.waitForBoot {
 	52: { | velocity |
 		Synth(\percussiveNoise, [\bufnum, ~convolutionBuffers.choose, \amp, 0.1 * velocity, \release, 0.2 * velocity], ~parGroup);
 	},
-	44: { | velocity |
-		Synth(\bassDrum, [\amp, velocity * 0.5, \releaseTime, 4]);
+	44: { | vel |
+		Synth(\bassDrum, [\amp, vel * 0.5, \releaseTime, 4]);
+		~maxOsc.sendMsg("/bassDrumHit", vel);
 	},
 	36: { | velocity |
 		var createSynth = {
@@ -202,6 +204,7 @@ s.waitForBoot {
 			\oscDefect, 0.1,
 			\amp, 0.2 * vel
 		], ~parGroup);
+		~maxOsc.sendMsg("/sinHit", vel);
 	},
 	45: { | vel |
 		Synth(\normalizedVocoder, [
@@ -215,6 +218,7 @@ s.waitForBoot {
 			\oscDefect, 0.1,
 			\amp, 0.2 * vel
 		], ~parGroup);
+		~maxOsc.sendMsg("/sinHit", vel);
 	},
 	53: { | vel |
 		Synth(\normalizedVocoder, [
@@ -228,6 +232,7 @@ s.waitForBoot {
 			\oscDefect, 0.1,
 			\amp, 0.2 * vel
 		], ~parGroup);
+		~maxOsc.sendMsg("/sinHit", vel);
 	},
 	61: { | vel |
 		Synth(\normalizedVocoder, [
@@ -241,6 +246,7 @@ s.waitForBoot {
 			\oscDefect, 0.1,
 			\amp, 0.2 * vel
 		], ~parGroup);
+		~maxOsc.sendMsg("/sinHit", vel);
 	},
 	69: { | vel |
 		Synth(\normalizedVocoder, [
@@ -254,6 +260,7 @@ s.waitForBoot {
 			\oscDefect, 0.1,
 			\amp, 0.2 * vel
 		], ~parGroup);
+		~maxOsc.sendMsg("/sinHit", vel);
 	},
 	77: { | vel |
 		Synth(\normalizedVocoder, [
@@ -267,6 +274,7 @@ s.waitForBoot {
 			\oscDefect, 0.1,
 			\amp, 0.2 * vel
 		], ~parGroup);
+		~maxOsc.sendMsg("/sinHit", vel);
 	},
 	85: { | vel |
 		Synth(\normalizedVocoder, [
@@ -280,6 +288,7 @@ s.waitForBoot {
 			\oscDefect, 0.1,
 			\amp, 0.2 * vel
 		], ~parGroup);
+		~maxOsc.sendMsg("/sinHit", vel);
 	},
 	93: { | vel |
 		Synth(\normalizedVocoder, [
@@ -293,6 +302,7 @@ s.waitForBoot {
 			\oscDefect, 0.1,
 			\amp, 0.2 * vel
 		], ~parGroup);
+		~maxOsc.sendMsg("/sinHit", vel);
 	},
 	// 3rd Column
 	38: { | vel |
@@ -307,6 +317,7 @@ s.waitForBoot {
 			\oscDefect, 0.1,
 			\amp, 0.2 * vel
 		], ~parGroup);
+		~maxOsc.sendMsg("/mistHit", vel);
 	},
 	46: { | vel |
 		Synth(\normalizedVocoder, [
@@ -320,6 +331,7 @@ s.waitForBoot {
 			\oscDefect, 0.1,
 			\amp, 0.2 * vel
 		], ~parGroup);
+		~maxOsc.sendMsg("/mistHit", vel);
 	},
 	54: { | vel |
 		Synth(\normalizedVocoder, [
@@ -333,6 +345,7 @@ s.waitForBoot {
 			\oscDefect, 0.1,
 			\amp, 0.2 * vel
 		], ~parGroup);
+		~maxOsc.sendMsg("/mistHit", vel);
 	},
 	62: { | vel |
 		Synth(\normalizedVocoder, [
@@ -346,6 +359,7 @@ s.waitForBoot {
 			\oscDefect, 0.1,
 			\amp, 0.2 * vel
 		], ~parGroup);
+		~maxOsc.sendMsg("/mistHit", vel);
 	},
 	70: { | vel |
 		Synth(\normalizedVocoder, [
@@ -359,6 +373,7 @@ s.waitForBoot {
 			\oscDefect, 0.1,
 			\amp, 0.2 * vel
 		], ~parGroup);
+		~maxOsc.sendMsg("/mistHit", vel);
 	},
 	78: { | vel |
 		Synth(\normalizedVocoder, [
@@ -372,6 +387,7 @@ s.waitForBoot {
 			\oscDefect, 0.1,
 			\amp, 0.2 * vel
 		], ~parGroup);
+		~maxOsc.sendMsg("/mistHit", vel);
 	},
 	86: { | vel |
 		Synth(\normalizedVocoder, [
@@ -385,6 +401,7 @@ s.waitForBoot {
 			\oscDefect, 0.1,
 			\amp, 0.2 * vel
 		], ~parGroup);
+		~maxOsc.sendMsg("/mistHit", vel);
 	},
 	94: { | vel |
 		Synth(\normalizedVocoder, [
@@ -398,13 +415,16 @@ s.waitForBoot {
 			\oscDefect, 0.1,
 			\amp, 0.2 * vel
 		], ~parGroup);
+		~maxOsc.sendMsg("/mistHit", vel);
 	},
 	// Row 4
 	95: { | vel |
-		Synth(\crazyFall, [\dur, 10, \amp, 0.1, \pan, rrand(-1.0, 1), \startFreq, s.sampleRate]);
+		Synth(\crazyFall, [\dur, 10, \amp, 0.1 * vel, \pan, rrand(-1.0, 1), \startFreq, s.sampleRate]);
+		~maxOsc.sendMsg("/crazyFall", vel);
 	},
 	87: { | vel |
-		Synth(\crazyFall, [\dur, 10, \amp, 0.1, \pan, rrand(-1.0, 1), \startFreq, 1000, \endFreq, 20000]);
+		Synth(\crazyFall, [\dur, 10, \amp, 0.1 * vel, \pan, rrand(-1.0, 1), \startFreq, 1000, \endFreq, 20000]);
+		~maxOsc.sendMsg("/crazyFall", vel);
 	},
 	79: { | vel |
 		~noteOffMap[79] = Synth(\noisyCross, [\bufnum, ~samples.neighs.choose, \amp, 0.2]);
@@ -439,6 +459,7 @@ MIDIdef.noteOff(\noteOffs, { arg ...args;
 	nn.postln;
 	~noteOffMap[nn].release;
 });
+
 )
 ~routines.longIntro.play;
 Synth(\bouncyBass)
