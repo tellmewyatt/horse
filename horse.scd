@@ -5,6 +5,16 @@ s.options.hardwareBufferSize = 1024;
 Server.supernova;
 s.reboot;
 MIDIIn.connectAll;
+~lpxOut = MIDIOut.newByName("Launchpad X", "LPX MIDI In");
+~lpxOut.latency = 0;
+~colorAllPads = { | function |
+	8.collect { | row |
+		8.collect { | col |
+			var nn = row * 10 + col + 11;
+			~lpxOut.noteOn(0, nn, function.(nn))
+		}
+	}
+};
 ~maxOsc = NetAddr.new("127.0.0.1", 5000);
 s.waitForBoot {
 	// Run the setup
@@ -127,14 +137,16 @@ s.waitForBoot {
 	sinHitPanRange: 0.125,
 	reverbSend: 0.5,
 	bassAmp: 0.4,
+	noteOffColor: 1,
 );
+~colorAllPads.({ ~config.noteOffColor });
 // This is a 8 x 8 map from [36..99]
 ~noteOffMap = ();
 ~noteOnMap = (
 	// Column 1
-	92: { ~routines.longIntro.play; },
-	84: { ~routinesattackFromEverywhere.play; },
-	76: { | velocity |
+	81: { ~routines.longIntro.play; },
+	71: { ~routinesattackFromEverywhere.play; },
+	61: { | velocity |
 		Synth(\normalizedVocoder, [
 			\bufnum, ~samples.whatami,
 			\freqRatio, 0.6,
@@ -147,7 +159,7 @@ s.waitForBoot {
 			\oscDefect, 0.1
 		], ~parGroup);
 	},
-	68: {
+	51: {
 		Synth(\horseGallop, [
 			\bufnumL, ~samples.gallopsL,
 			\bufnumR, ~samples.gallopsR,
@@ -158,7 +170,7 @@ s.waitForBoot {
 
 		], ~parGroup);
 	},
-	60: {
+	41: {
 		var samp = ~samples.neighs.choose;
 		Synth(\horseGallop, [
 			\bufnumL, samp,
@@ -172,14 +184,14 @@ s.waitForBoot {
 
 		]);
 	},
-	52: { | velocity |
+	31: { | velocity |
 		Synth(\percussiveNoise, [\bufnum, ~convolutionBuffers.choose, \amp, 0.1 * velocity, \release, 0.2 * velocity], ~parGroup);
 	},
-	44: { | vel |
+	21: { | vel |
 		Synth(\bassDrum, [\amp, vel * 0.5, \releaseTime, 4]);
 		~maxOsc.sendMsg("/bassDrumHit", vel);
 	},
-	36: { | velocity |
+	11: { | velocity |
 		var createSynth = {
 			~vocoder = Synth(\vocoder, [\amp, 2, \oscDefect, 1]);
 			NodeWatcher.register(~vocoder);
@@ -191,8 +203,8 @@ s.waitForBoot {
 			}, createSynth)
 		});
 	},
-	// 2nd Column
-	37: { | vel |
+	// Column 2
+	12: { | vel |
 		Synth(\normalizedVocoder, [
 			\bufnum, ~convolutionBuffers.choose,
 			\freqRatio, 0.6,
@@ -206,7 +218,7 @@ s.waitForBoot {
 		], ~parGroup);
 		~maxOsc.sendMsg("/sinHit", vel);
 	},
-	45: { | vel |
+	22: { | vel |
 		Synth(\normalizedVocoder, [
 			\bufnum, ~convolutionBuffers.choose,
 			\freqRatio, 0.6,
@@ -220,7 +232,7 @@ s.waitForBoot {
 		], ~parGroup);
 		~maxOsc.sendMsg("/sinHit", vel);
 	},
-	53: { | vel |
+	32: { | vel |
 		Synth(\normalizedVocoder, [
 			\bufnum, ~convolutionBuffers.choose,
 			\freqRatio, 0.6,
@@ -234,7 +246,7 @@ s.waitForBoot {
 		], ~parGroup);
 		~maxOsc.sendMsg("/sinHit", vel);
 	},
-	61: { | vel |
+	42: { | vel |
 		Synth(\normalizedVocoder, [
 			\bufnum, ~convolutionBuffers.choose,
 			\freqRatio, 0.6,
@@ -248,7 +260,7 @@ s.waitForBoot {
 		], ~parGroup);
 		~maxOsc.sendMsg("/sinHit", vel);
 	},
-	69: { | vel |
+	52: { | vel |
 		Synth(\normalizedVocoder, [
 			\bufnum, ~convolutionBuffers.choose,
 			\freqRatio, 0.6,
@@ -262,7 +274,7 @@ s.waitForBoot {
 		], ~parGroup);
 		~maxOsc.sendMsg("/sinHit", vel);
 	},
-	77: { | vel |
+	62: { | vel |
 		Synth(\normalizedVocoder, [
 			\bufnum, ~convolutionBuffers.choose,
 			\freqRatio, 0.6,
@@ -276,7 +288,7 @@ s.waitForBoot {
 		], ~parGroup);
 		~maxOsc.sendMsg("/sinHit", vel);
 	},
-	85: { | vel |
+	72: { | vel |
 		Synth(\normalizedVocoder, [
 			\bufnum, ~convolutionBuffers.choose,
 			\freqRatio, 0.6,
@@ -290,7 +302,7 @@ s.waitForBoot {
 		], ~parGroup);
 		~maxOsc.sendMsg("/sinHit", vel);
 	},
-	93: { | vel |
+	82: { | vel |
 		Synth(\normalizedVocoder, [
 			\bufnum, ~convolutionBuffers.choose,
 			\freqRatio, 0.6,
@@ -304,8 +316,8 @@ s.waitForBoot {
 		], ~parGroup);
 		~maxOsc.sendMsg("/sinHit", vel);
 	},
-	// 3rd Column
-	38: { | vel |
+	// Column 3
+	13: { | vel |
 		Synth(\normalizedVocoder, [
 			\bufnum, ~samples.neighs.choose,
 			\freqRatio, 0.6,
@@ -319,7 +331,7 @@ s.waitForBoot {
 		], ~parGroup);
 		~maxOsc.sendMsg("/mistHit", vel);
 	},
-	46: { | vel |
+	23: { | vel |
 		Synth(\normalizedVocoder, [
 			\bufnum, ~samples.neighs.choose,
 			\freqRatio, 0.6,
@@ -333,7 +345,7 @@ s.waitForBoot {
 		], ~parGroup);
 		~maxOsc.sendMsg("/mistHit", vel);
 	},
-	54: { | vel |
+	33: { | vel |
 		Synth(\normalizedVocoder, [
 			\bufnum, ~samples.neighs.choose,
 			\freqRatio, 0.6,
@@ -347,7 +359,7 @@ s.waitForBoot {
 		], ~parGroup);
 		~maxOsc.sendMsg("/mistHit", vel);
 	},
-	62: { | vel |
+	43: { | vel |
 		Synth(\normalizedVocoder, [
 			\bufnum, ~samples.neighs.choose,
 			\freqRatio, 0.6,
@@ -361,7 +373,7 @@ s.waitForBoot {
 		], ~parGroup);
 		~maxOsc.sendMsg("/mistHit", vel);
 	},
-	70: { | vel |
+	53: { | vel |
 		Synth(\normalizedVocoder, [
 			\bufnum, ~samples.neighs.choose,
 			\freqRatio, 0.6,
@@ -375,7 +387,7 @@ s.waitForBoot {
 		], ~parGroup);
 		~maxOsc.sendMsg("/mistHit", vel);
 	},
-	78: { | vel |
+	63: { | vel |
 		Synth(\normalizedVocoder, [
 			\bufnum, ~samples.neighs.choose,
 			\freqRatio, 0.6,
@@ -389,7 +401,7 @@ s.waitForBoot {
 		], ~parGroup);
 		~maxOsc.sendMsg("/mistHit", vel);
 	},
-	86: { | vel |
+	73: { | vel |
 		Synth(\normalizedVocoder, [
 			\bufnum, ~samples.neighs.choose,
 			\freqRatio, 0.6,
@@ -403,7 +415,7 @@ s.waitForBoot {
 		], ~parGroup);
 		~maxOsc.sendMsg("/mistHit", vel);
 	},
-	94: { | vel |
+	83: { | vel |
 		Synth(\normalizedVocoder, [
 			\bufnum, ~samples.neighs.choose,
 			\freqRatio, 0.6,
@@ -417,55 +429,89 @@ s.waitForBoot {
 		], ~parGroup);
 		~maxOsc.sendMsg("/mistHit", vel);
 	},
-	// Row 4
-	95: { | vel |
+
+
+	// Column 4
+	84: { | vel |
 		Synth(\crazyFall, [\dur, 10, \amp, 0.1 * vel, \pan, rrand(-1.0, 1), \startFreq, s.sampleRate]);
 		~maxOsc.sendMsg("/crazyFall", vel);
 	},
-	87: { | vel |
+	74: { | vel |
 		Synth(\crazyFall, [\dur, 10, \amp, 0.1 * vel, \pan, rrand(-1.0, 1), \startFreq, 1000, \endFreq, 20000]);
 		~maxOsc.sendMsg("/crazyFall", vel);
 	},
-	79: { | vel |
-		~noteOffMap[79] = Synth(\noisyCross, [\bufnum, ~samples.neighs.choose, \amp, 0.2]);
+	64: { | vel |
+		~noteOffMap[64] = Synth(\noisyCross, [\bufnum, ~samples.neighs.choose, \amp, 0.2]);
 	},
-	71: { | vel |
-		~noteOffMap[71] = Synth(\noisyCross, [\bufnum, ~samples.gallopsL, \amp, 0.5]);
+	54: { | vel |
+		~noteOffMap[54] = Synth(\noisyCross, [\bufnum, ~samples.gallopsL, \amp, 0.5]);
 	},
-	63: { | vel |
-		~noteOffMap[63] = Synth(\bouncyBass, [\freq, 40.midicps, \amp, ~config.bassAmp * vel]);
+	44: { | vel |
+		~noteOffMap[44] = Synth(\normalizedVocoderHeld, [
+			\bufnum, ~samples.gallopsL,
+			\freqRatio, 0.6,
+			\freq, 200,
+			\convolutionBuffer, ~convolutionBuffers.choose,
+			\reverbSend, 0,
+			\reverbBus, ~busses.reverb,
+			\pan, rrand(-1.0, 1),
+			\oscDefect, 0,
+			\amp, 0.1 * vel,
+			\attack, 4,
+			\release, 4
+		], ~parGroup);
+	},
+	34: { | vel |
+		~noteOffMap[34] = Synth(\normalizedVocoderHeld, [
+			\bufnum, ~samples.gallopsL,
+			\freqRatio, 0.6,
+			\freq, 200 * 6.5.midiratio                                                                                                                                                                                                                                                                                                    ,
+			\convolutionBuffer, ~convolutionBuffers.choose,
+			\reverbSend, 0,
+			\reverbBus, ~busses.reverb,
+			\pan, rrand(-1.0, 1),
+			\oscDefect, 0,
+			\amp, 0.1 * vel,
+			\attack, 4,
+			\release, 4
+		], ~parGroup);
+	},
+	24: { | vel |
+		~noteOffMap[24] = Synth(\bouncyBass, [\freq, 30.midicps, \amp, ~config.bassAmp * vel]);
+	},
+	14: { | vel |
+		~noteOffMap[14] = Synth(\bouncyBass, [\freq, 25.midicps, \amp, ~config.bassAmp * vel]);
+	},
+
+
+	// Column 5
+	15: { | vel |
+		~noteOffMap[15] = Synth(\sinPulse, [\freq, 200, \pan, rrand(-1.0, 1)]);
+	},
+	25: { | vel |
+		~noteOffMap[25] = Synth(\sinPulse, [\freq, 300, \pan, rrand(-1.0, 1)]);
+	},
+	35: { | vel |
+		~noteOffMap[35] = Synth(\sinPulse, [\freq, 350, \pan, rrand(-1.0, 1)]);
+	},
+	45: { | vel |
+		~noteOffMap[45] = Synth(\sinPulse, [\freq, 266, \pan, rrand(-1.0, 1)]);
+
 	},
 	55: { | vel |
-		~noteOffMap[55] = Synth(\bouncyBass, [\freq, 35.midicps, \amp, ~config.bassAmp * vel]);
+		~noteOffMap[55] = Synth(\sinPulse, [\freq, 295, \pan, rrand(-1.0, 1)]);
 	},
-	47: { | vel |
-		~noteOffMap[47] = Synth(\bouncyBass, [\freq, 30.midicps, \amp, ~config.bassAmp * vel]);
+	65: { | vel |
+		~noteOffMap[65] = Synth(\sinPulse, [\freq, 400, \pan, rrand(-1.0, 1)]);
 	},
-	39: { | vel |
-		~noteOffMap[39] = Synth(\bouncyBass, [\freq, 25.midicps, \amp, ~config.bassAmp * vel]);
+	75: { | vel |
+		~noteOffMap[75] = Synth(\sinPulse, [\freq, 420, \pan, rrand(-1.0, 1)]);
 	},
-	// Row 5
-	40: { | vel |
-		~noteOffMap[40] = Synth(\sinPulse, [\freq, 200]);
-	},
-	48: { | vel |
-		~noteOffMap[48] = Synth(\sinPulse, [\freq, 300]);
-	},
-	56: { | vel |
-		~noteOffMap[56] = Synth(\sinPulse, [\freq, 350]);
-	},
-	64: { | vel |
-		~noteOffMap[64] = Synth(\sinPulse, [\freq, 266]);
-	},
-	72: { | vel |
-		~noteOffMap[72] = Synth(\sinPulse, [\freq, 295]);
-	},
-	80: { | vel |
-		~noteOffMap[80] = Synth(\sinPulse, [\freq, 400]);
-	},
-	88: { | vel |
-		~noteOffMap[88] = Synth(\sinPulse, [\freq, 420]);
+	85: { | vel |
+		~noteOffMap[85] = Synth(\sinPulse, [\freq, 490, \pan, rrand(-1.0, 1)]);
 	}
+
+
 
 );
 MIDIdef.noteOn(\noteOns, { arg ...args;
@@ -473,12 +519,14 @@ MIDIdef.noteOn(\noteOns, { arg ...args;
 	var vel = args[0];
 	[nn, vel].postln;
 	nn.postln;
+	~lpxOut.noteOn(0, nn, rrand(0, 127));
 	~noteOnMap[nn].(vel / 127);
 });
 MIDIdef.noteOff(\noteOffs, { arg ...args;
 	var nn = args[1];
 	var vel = args[0];
 	nn.postln;
+	~lpxOut.noteOn(0, nn, ~config.noteOffColor);
 	~noteOffMap[nn].release;
 });
 
