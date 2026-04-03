@@ -134,6 +134,39 @@ SynthDef(\normalizedVocoder, { | amp=0.2, gate=1, freq=200, out=0, bufnum, pan=0
 	);
 	Out.ar(out, sig);
 }).add;
+SynthDef(\normalizedVocoderHeld, { | amp=0.2, gate=1, freq=200, out=0, bufnum, pan=0, freqRatio=1, convolutionBuffer, oscDefect=0, envCurve= -4, reverbBus, reverbSend=0, reverbPreDelay=0, attack=1, release=1 |
+	// Vocoder section
+	var insig = PlayBuf.ar(
+		1,
+		bufnum,
+		BufRateScale.kr(bufnum) * freqRatio
+	);
+	// Analysis
+	var filters = BPF.ar(insig, 100.collect { | i | (i + 1) * 100 * freqRatio }, 0.1, 1);
+	var amps = filters.collect { | item | Amplitude.ar(item) };
+	// Resynthesis
+	var sig =  amps.collect ({ | amp, i |
+		SinOsc.ar((i+ 1) * freq * (1 + (Rand(-1.0, 1) * oscDefect)), 0, amp);
+	}).sum * 2;
+
+	var attackTime = 1.5 / freqRatio;
+	var env = EnvGen.kr(
+		Env.asr(attack, 1, release),
+		gate,
+		doneAction: 2
+	);
+	sig = Normalizer.ar(sig, 0.5, 0.001) + sig;
+	sig = sig +HPF.ar(Convolution2.ar(sig, convolutionBuffer, 0, 1024) * 0.1, 100);
+	sig = ~panEvenly.(
+		sig * 0.5 * amp * env,
+		pan
+	);
+	sig = LPF.ar(sig, 4000);
+	Out.ar(reverbBus,
+		DelayN.ar(reverbSend * sig, 0.2, 2 * reverbPreDelay)
+	);
+	Out.ar(out, sig);
+}).add;
 SynthDef(\percussiveNoise, { | amp = 1, pan=0, bufnum, out=0, gate=1, release =0.01 |
 	var env = EnvGen.kr(Env([0,1,1,0], [0, 15, 0]), gate, doneAction: 2);
 	var sig = PlayBuf.ar(1,bufnum) * 0.8 * EnvGen.ar(Env.perc(0,release));
@@ -208,8 +241,12 @@ SynthDef(\noisyCrossControlled, { | out = 0, amp = 0.2, bufnum, gate=1, pan=0, p
 		~panEvenly.(Limiter.ar(sig, 0.5), pan, 2, 0.5)
 	);
 }).add;
-SynthDef(\sinPulse, { | freq=200, gate=1, out = 0 , amp=0.1, pan=0 |
-	var env = EnvGen.kr(Env.asr(0.01, 1, 0.01), gate, doneAction: 2);
-	var sig = LPF.ar(LFPulse.ar(2).range(0.5,1), 1000) * SinOsc.ar(freq, 0) * amp * env;
+SynthDef(\sinPulse, { | freq=200, gate=1, out = 0 , amp=0.1, pan=0, distortionFactor=0 |
+	var env, sig;
+	// Prevent distortion factor from being less than 0
+	distortionFactor = distortionFactor.max(0);
+	env = EnvGen.kr(Env.asr(0.01, 1, 0.01), gate, doneAction: 2);
+	sig = SinOsc.ar(freq, 0) + SinOsc.ar(freq, 0, distortionFactor).tanh / (distortionFactor+1);
+	sig = LPF.ar(LFPulse.ar(2).range(0.5,1), 1000) * sig * amp * env;
 	Out.ar(out, ~panEvenly.(sig, pan));
 }).add;
