@@ -24,6 +24,12 @@ s.waitForBoot {
 		~busses = ();
 		// Create the reverb bus
 		~busses.reverb = Bus.audio(s, s.options.numOutputBusChannels);
+		// Controls RGB video
+		~busses.video= (
+			rgbScales: Bus.control(s, 3),
+			noiseLevel: Bus.control(s, 1),
+			saturation: Bus.control(s, 1)
+		);
 		~samples = ();
 		~convolutionBuffers =
 		40.collect {
@@ -46,6 +52,10 @@ s.waitForBoot {
 )
 (
 ~reverb = Synth(\reverb, [\in, ~busses.reverb]);
+~scaleVideoRGB = Synth.tail(s, \videoControl3, [\in, ~busses.video.rgbScales, \out, ~busses.video.rgbScales]);
+~scaleVideoNoise = Synth.tail(s, \videoControl, [\in, ~busses.video.noiseLevel, \out, ~busses.video.noiseLevel]);
+~rgbOffset = Synth(\rgbOffset, [\out, ~busses.video.rgbScales]);
+~saturationOffset = Synth(\videoOffset, [\out, ~busses.video.saturation]);
 // Create the parallel group that will persist forever
 ~parGroup = ParGroup(s);
 ~routines = ();
@@ -136,10 +146,18 @@ s.waitForBoot {
 ~config = (
 	sinHitPanRange: 0.125,
 	reverbSend: 0.5,
-	bassAmp: 0.4,
-	noteOffColor: 1,
+	bassAmp: 0.4
 );
-~colorAllPads.({ ~config.noteOffColor });
+~colorPad = { | nn |
+	var alternate = nn.asString[0].digit % 2;
+	if(nn + alternate % 2 == 0) {
+		120
+	}
+	{
+		21
+	}
+};
+~colorAllPads.(~colorPad);
 // This is a 8 x 8 map from [36..99]
 ~noteOffMap = ();
 ~noteOnMap = (
@@ -189,11 +207,11 @@ s.waitForBoot {
 	},
 	21: { | vel |
 		Synth(\bassDrum, [\amp, vel * 0.5, \releaseTime, 4]);
-		~maxOsc.sendMsg("/bassDrumHit", vel);
+		Synth(\videoHit, [\out, ~busses.video.saturation, \amp, vel * 10, \release, 4]);
 	},
 	11: { | velocity |
 		var createSynth = {
-			~vocoder = Synth(\vocoder, [\amp, 2, \oscDefect, 1]);
+			~vocoder = Synth(\vocoder, [\amp, 2, \oscDefect, 1, \reverbBus, ~busses.reverb, \reverbSend, ~config.reverbSend]);
 			NodeWatcher.register(~vocoder);
 		};
 		if(~vocoder == nil, createSynth, {
@@ -216,7 +234,7 @@ s.waitForBoot {
 			\oscDefect, 0.1,
 			\amp, 0.2 * vel
 		], ~parGroup);
-		~maxOsc.sendMsg("/sinHit", vel);
+		Synth(\rgbHit, [\out, ~busses.video.rgbScales, \red, 0, \green, rrand(0.1, 1), \blue, rrand(0.1, 1), \amp, vel]);
 	},
 	22: { | vel |
 		Synth(\normalizedVocoder, [
@@ -230,7 +248,7 @@ s.waitForBoot {
 			\oscDefect, 0.1,
 			\amp, 0.2 * vel
 		], ~parGroup);
-		~maxOsc.sendMsg("/sinHit", vel);
+		Synth(\rgbHit, [\out, ~busses.video.rgbScales, \red, 0, \green, rrand(0.1, 1), \blue, rrand(0.1, 1), \amp, vel]);
 	},
 	32: { | vel |
 		Synth(\normalizedVocoder, [
@@ -244,7 +262,7 @@ s.waitForBoot {
 			\oscDefect, 0.1,
 			\amp, 0.2 * vel
 		], ~parGroup);
-		~maxOsc.sendMsg("/sinHit", vel);
+		Synth(\rgbHit, [\out, ~busses.video.rgbScales, \red, 0, \green, rrand(0.1, 1), \blue, rrand(0.1, 1), \amp, vel]);
 	},
 	42: { | vel |
 		Synth(\normalizedVocoder, [
@@ -258,7 +276,7 @@ s.waitForBoot {
 			\oscDefect, 0.1,
 			\amp, 0.2 * vel
 		], ~parGroup);
-		~maxOsc.sendMsg("/sinHit", vel);
+		Synth(\rgbHit, [\out, ~busses.video.rgbScales, \red, 0, \green, rrand(0.1, 1), \blue, rrand(0.1, 1), \amp, vel]);
 	},
 	52: { | vel |
 		Synth(\normalizedVocoder, [
@@ -272,7 +290,7 @@ s.waitForBoot {
 			\oscDefect, 0.1,
 			\amp, 0.2 * vel
 		], ~parGroup);
-		~maxOsc.sendMsg("/sinHit", vel);
+		Synth(\rgbHit, [\out, ~busses.video.rgbScales, \red, 0, \green, rrand(0.1, 1), \blue, rrand(0.1, 1), \amp, vel]);
 	},
 	62: { | vel |
 		Synth(\normalizedVocoder, [
@@ -286,7 +304,7 @@ s.waitForBoot {
 			\oscDefect, 0.1,
 			\amp, 0.2 * vel
 		], ~parGroup);
-		~maxOsc.sendMsg("/sinHit", vel);
+		Synth(\rgbHit, [\out, ~busses.video.rgbScales, \red, 0, \green, rrand(0.1, 1), \blue, rrand(0.1, 1), \amp, vel]);
 	},
 	72: { | vel |
 		Synth(\normalizedVocoder, [
@@ -300,7 +318,7 @@ s.waitForBoot {
 			\oscDefect, 0.1,
 			\amp, 0.2 * vel
 		], ~parGroup);
-		~maxOsc.sendMsg("/sinHit", vel);
+		Synth(\rgbHit, [\out, ~busses.video.rgbScales, \red, 0, \green, rrand(0.1, 1), \blue, rrand(0.1, 1), \amp, vel]);
 	},
 	82: { | vel |
 		Synth(\normalizedVocoder, [
@@ -312,10 +330,12 @@ s.waitForBoot {
 			\reverbBus, ~busses.reverb,
 			\pan, rrand(~config.sinHitPanRange.neg, ~config.sinHitPanRange),
 			\oscDefect, 0.1,
-			\amp, 0.2 * vel
+			\amp, 0.2 * vel,
 		], ~parGroup);
-		~maxOsc.sendMsg("/sinHit", vel);
+		Synth(\rgbHit, [\out, ~busses.video.rgbScales, \red, 0, \green, rrand(0.1, 1), \blue, rrand(0.1, 1), \amp, vel]);
 	},
+
+
 	// Column 3
 	13: { | vel |
 		Synth(\normalizedVocoder, [
@@ -329,7 +349,7 @@ s.waitForBoot {
 			\oscDefect, 0.1,
 			\amp, 0.2 * vel
 		], ~parGroup);
-		~maxOsc.sendMsg("/mistHit", vel);
+		Synth(\rgbHit, [\out, ~busses.video.rgbScales, \red, rrand(0.1, 0.5), \green, rrand(0.1, 1), \blue, rrand(0.1, 0.5), \attack, 1, \release, 1, \amp, vel]);
 	},
 	23: { | vel |
 		Synth(\normalizedVocoder, [
@@ -343,7 +363,7 @@ s.waitForBoot {
 			\oscDefect, 0.1,
 			\amp, 0.2 * vel
 		], ~parGroup);
-		~maxOsc.sendMsg("/mistHit", vel);
+		Synth(\rgbHit, [\out, ~busses.video.rgbScales, \red, rrand(0.1, 0.5), \green, rrand(0.1, 1), \blue, rrand(0.1, 0.5), \attack, 1, \release, 1, \amp, vel]);
 	},
 	33: { | vel |
 		Synth(\normalizedVocoder, [
@@ -357,7 +377,7 @@ s.waitForBoot {
 			\oscDefect, 0.1,
 			\amp, 0.2 * vel
 		], ~parGroup);
-		~maxOsc.sendMsg("/mistHit", vel);
+		Synth(\rgbHit, [\out, ~busses.video.rgbScales, \red, rrand(0.1, 0.5), \green, rrand(0.1, 1), \blue, rrand(0.1, 0.5), \attack, 1, \release, 1, \amp, vel]);
 	},
 	43: { | vel |
 		Synth(\normalizedVocoder, [
@@ -371,7 +391,7 @@ s.waitForBoot {
 			\oscDefect, 0.1,
 			\amp, 0.2 * vel
 		], ~parGroup);
-		~maxOsc.sendMsg("/mistHit", vel);
+		Synth(\rgbHit, [\out, ~busses.video.rgbScales, \red, rrand(0.1, 0.5), \green, rrand(0.1, 1), \blue, rrand(0.1, 0.5), \attack, 1, \release, 1, \amp, vel]);
 	},
 	53: { | vel |
 		Synth(\normalizedVocoder, [
@@ -385,7 +405,7 @@ s.waitForBoot {
 			\oscDefect, 0.1,
 			\amp, 0.2 * vel
 		], ~parGroup);
-		~maxOsc.sendMsg("/mistHit", vel);
+		Synth(\rgbHit, [\out, ~busses.video.rgbScales, \red, rrand(0.1, 0.5), \green, rrand(0.1, 1), \blue, rrand(0.1, 0.5), \attack, 1, \release, 1, \amp, vel]);
 	},
 	63: { | vel |
 		Synth(\normalizedVocoder, [
@@ -399,7 +419,7 @@ s.waitForBoot {
 			\oscDefect, 0.1,
 			\amp, 0.2 * vel
 		], ~parGroup);
-		~maxOsc.sendMsg("/mistHit", vel);
+		Synth(\rgbHit, [\out, ~busses.video.rgbScales, \red, rrand(0.1, 0.5), \green, rrand(0.1, 1), \blue, rrand(0.1, 0.5), \attack, 1, \release, 1, \amp, vel]);
 	},
 	73: { | vel |
 		Synth(\normalizedVocoder, [
@@ -413,7 +433,7 @@ s.waitForBoot {
 			\oscDefect, 0.1,
 			\amp, 0.2 * vel
 		], ~parGroup);
-		~maxOsc.sendMsg("/mistHit", vel);
+		Synth(\rgbHit, [\out, ~busses.video.rgbScales, \red, rrand(0.1, 0.5), \green, rrand(0.1, 1), \blue, rrand(0.1, 0.5), \attack, 1, \release, 1, \amp, vel]);
 	},
 	83: { | vel |
 		Synth(\normalizedVocoder, [
@@ -427,18 +447,18 @@ s.waitForBoot {
 			\oscDefect, 0.1,
 			\amp, 0.2 * vel
 		], ~parGroup);
-		~maxOsc.sendMsg("/mistHit", vel);
+		Synth(\rgbHit, [\out, ~busses.video.rgbScales, \red, rrand(0.1, 0.5), \green, rrand(0.1, 1), \blue, rrand(0.1, 0.5), \attack, 1, \release, 1, \amp, vel]);
 	},
 
 
 	// Column 4
 	84: { | vel |
 		Synth(\crazyFall, [\dur, 10, \amp, 0.1 * vel, \pan, rrand(-1.0, 1), \startFreq, s.sampleRate]);
-		~maxOsc.sendMsg("/crazyFall", vel);
+		Synth(\videoHit, [\out, ~busses.video.noiseLevel, \attack, 0.01, \release, 11, \amp, vel]);
 	},
 	74: { | vel |
 		Synth(\crazyFall, [\dur, 10, \amp, 0.1 * vel, \pan, rrand(-1.0, 1), \startFreq, 1000, \endFreq, 20000]);
-		~maxOsc.sendMsg("/crazyFall", vel);
+		Synth(\videoHit, [\out, ~busses.video.noiseLevel, \attack, 0.01, \release, 11, \amp, vel]);
 	},
 	64: { | vel |
 		~noteOffMap[64] = Synth(\noisyCross, [\bufnum, ~samples.neighs.choose, \amp, 0.2]);
@@ -526,10 +546,24 @@ MIDIdef.noteOff(\noteOffs, { arg ...args;
 	var nn = args[1];
 	var vel = args[0];
 	nn.postln;
-	~lpxOut.noteOn(0, nn, ~config.noteOffColor);
+	~lpxOut.noteOn(0, nn, ~colorPad.(nn));
 	~noteOffMap[nn].release;
 });
-
+~sendVideoData = r {
+	loop {
+		~busses.video.rgbScales.get({ | value |
+			~maxOsc.sendMsg("/rscale", value[0]);
+			~maxOsc.sendMsg("/gscale", value[1]);
+			~maxOsc.sendMsg("/bscale", value[2]);
+		});
+		~busses.video.noiseLevel.get({ | value |
+			~maxOsc.sendMsg("/noiseLevel", value);
+		});
+		~busses.video.saturation.get({ | value |
+			~maxOsc.sendMsg("/saturation", value);
+		});
+		0.01.wait;
+	}
+}.play;
 )
-~routines.longIntro.play;
-Synth(\bouncyBass)
+~busses.video.rgbScales.scope;

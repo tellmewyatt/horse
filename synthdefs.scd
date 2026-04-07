@@ -1,4 +1,3 @@
-
 ~channelMaps = (
 	2:(
 		0: 0,
@@ -97,7 +96,21 @@ SynthDef(\vocoder, { | out = 0, pan=0, amp = 1, oscDefect=0, freq=100, gate=1, r
 	Out.ar(reverbBus, outsig * reverbSend);
 	Out.ar(out, outsig);
 }).add;
-SynthDef(\normalizedVocoder, { | amp=0.2, gate=1, freq=200, out=0, bufnum, pan=0, freqRatio=1, convolutionBuffer, oscDefect=0, envCurve= -4, reverbBus, reverbSend=0, reverbPreDelay=0 |
+SynthDef(\normalizedVocoder, { |
+	amp=0.2,
+	gate=1,
+	freq=200,
+	out=0,
+	bufnum,
+	pan=0,
+	freqRatio=1,
+	convolutionBuffer,
+	oscDefect=0,
+	envCurve= -4,
+	reverbBus,
+	reverbSend=0,
+	reverbPreDelay=0
+	|
 	// Vocoder section
 	var insig = PlayBuf.ar(
 		1,
@@ -249,4 +262,27 @@ SynthDef(\sinPulse, { | freq=200, gate=1, out = 0 , amp=0.1, pan=0, distortionFa
 	sig = SinOsc.ar(freq, 0) + SinOsc.ar(freq, 0, distortionFactor).tanh / (distortionFactor+1);
 	sig = LPF.ar(LFPulse.ar(2).range(0.5,1), 1000) * sig * amp * env;
 	Out.ar(out, ~panEvenly.(sig, pan));
+}).add;
+// Control SynthDefs
+SynthDef(\rgbHit, { | out, red=1, green=1, blue=1, attack=0.01, release=3, amp=1, curve= 0 |
+	Out.kr(out, EnvGen.kr(Env.perc(attack, release, amp, curve), doneAction: 2) * [red, green, blue]);
+}).add;
+SynthDef(\rgbOffset, { | out, red=1, green=1, blue=1 |
+	Out.kr(out, [red, green, blue])
+}).add;
+SynthDef(\videoHit, { | out, attack=0.01, release=3, amp=1, curve=0 |
+	Out.kr(out, EnvGen.kr(Env.perc(attack, release, amp, curve), doneAction: 2));
+}).add;
+SynthDef(\videoOffset, { | out, level=1 |
+	Out.kr(out, level)
+}).add;
+SynthDef(\videoControl, { | out, in, min=0, max=1 |
+	var sig = In.kr(in, 1);
+	sig = sig.min(max).max(min);
+	ReplaceOut.kr(out, sig);
+}).add;
+SynthDef(\videoControl3, { | out, in, min=0, max=1 |
+	var sig = In.kr(in, 3);
+	//sig = sig.min(max).max(min);
+	ReplaceOut.kr(out, sig);
 }).add;
