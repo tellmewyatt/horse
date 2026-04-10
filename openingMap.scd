@@ -1,4 +1,18 @@
 ~noteMap.def(\opening, { | m |
+	var getCol5Func = { | freq |
+		{ | vel, current |
+			var synth= Synth(\sinPulse, [\freq, freq, \pan, rrand(-1.0, 1), \distortionFactor, 0]);
+			current.toggleMap.collect { | synth |
+				synth.set(\distortionFactor, current.toggleMap.size);
+			};
+			synth;
+		}
+	};
+	var col5ToggleOff = { | vel, current |
+		current.toggleMap.collect { | synth |
+			synth.set(\distortionFactor, current.toggleMap.size);
+		};
+	};
 	// Column 1
 	m.hit(61, { | velocity |
 		Synth(\normalizedVocoder, [
@@ -133,12 +147,15 @@
 		], ~parGroup);
 	});
 	// Column 5
-	m.toggle(15,{ Synth(\sinPulse, [\freq, 200, \pan, rrand(-1.0, 1)]) });
-	m.toggle(25,{ Synth(\sinPulse, [\freq, 300, \pan, rrand(-1.0, 1)]) });
-	m.toggle(35,{ Synth(\sinPulse, [\freq, 350, \pan, rrand(-1.0, 1)]) });
-	m.toggle(45,{ Synth(\sinPulse, [\freq, 266, \pan, rrand(-1.0, 1)]) });
-	m.toggle(55,{ Synth(\sinPulse, [\freq, 295, \pan, rrand(-1.0, 1)]) });
-	m.toggle(65,{ Synth(\sinPulse, [\freq, 400, \pan, rrand(-1.0, 1)]) });
-	m.toggle(75,{ Synth(\sinPulse, [\freq, 420, \pan, rrand(-1.0, 1)]) });
-	m.toggle(85,{ Synth(\sinPulse, [\freq, 490, \pan, rrand(-1.0, 1)]); /*m.switchTo.("secondMap");*/ });
+	m.toggle(15, getCol5Func.(200));
+	m.toggle(25, getCol5Func.(300));
+	m.toggle(35, getCol5Func.(350));
+	m.toggle(45, getCol5Func.(266));
+	m.toggle(55, getCol5Func.(295));
+	m.toggle(65, getCol5Func.(400));
+	m.toggle(75, getCol5Func.(420));
+	m.toggle(85, getCol5Func.(490));
+	8.do { | i |
+		m.toggleOff(15 + (i * 10), col5ToggleOff);
+	};
 });

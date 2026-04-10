@@ -3,16 +3,16 @@ MIDIIn.connectAll;
 ~lpxOut.latency = 0;
 ~noteMap = (
 	noteMaps: ~noteMap.noteMaps ? (),
-	current: ~noteMap.current,
+	currentPointer: ~noteMap.currentPointer,
+	current: { | self | self.noteMaps[self.currentPointer] },
 	switchTo: { | self, name |
-		self.current = self.noteMaps[name];
-		self.noteMaps.postln;
-		self;
+		self.currentPointer = name;
 	},
 	def: { | self, name, func |
 		var newMap = (
 			onMap: (),
 			toggleMap: (),
+			toggleOffMap: (),
 			offMap: ()
 		);
 		// Executes the creation function
@@ -32,18 +32,26 @@ MIDIIn.connectAll;
 				toggle: { | innerSelf, nn, func |
 					newMap.onMap[nn] = { | vel |
 						if (newMap.toggleMap[nn] == nil) {
-							newMap.toggleMap[nn] = func.();
-							~colorPad.(nn, 50);
+							newMap.toggleMap[nn] = func.(vel, self.current);
+							self.colorPad(nn, 50);
 						} {
 							newMap.toggleMap[nn].release;
 							newMap.toggleMap[nn] = nil;
+						};
+						if(newMap.toggleOffMap[nn] != nil) {
+							newMap.toggleOffMap[nn].(vel, self.current)
 						}
 					}
+				},
+				// Function to be called after item is released;
+				toggleOff: { | innerSelf, nn, func |
+					newMap.toggleOffMap[nn] = func;
 				},
 				// Allows switching maps
 				switchTo: { | innerSelf, key |
 					self.current = self.noteMaps[key]
-				}
+				},
+				current: self.current
 			)
 		);
 		self.noteMaps[name] = newMap;

@@ -6,7 +6,7 @@ Server.supernova;
 s.reboot;
 "./noteMap.scd".loadRelative;
 "./openingMap.scd".loadRelative;
-"./config.scd".loadRelative
+"./config.scd".loadRelative;
 ~noteMap.switchTo(\opening);
 ~maxOsc = NetAddr.new("127.0.0.1", 5000);
 s.waitForBoot {
