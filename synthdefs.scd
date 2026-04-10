@@ -254,13 +254,14 @@ SynthDef(\noisyCrossControlled, { | out = 0, amp = 0.2, bufnum, gate=1, pan=0, p
 		~panEvenly.(Limiter.ar(sig, 0.5), pan, 2, 0.5)
 	);
 }).add;
-SynthDef(\sinPulse, { | freq=200, gate=1, out = 0 , amp=0.1, pan=0, distortionFactor=0 |
+SynthDef(\sinPulse, { | freq=200, gate=1, out = 0 , amp=0.1, pan=0, distortionFactor=0, panRateScale=0 |
 	var env, sig;
 	// Prevent distortion factor from being less than 0
 	distortionFactor = distortionFactor.max(0).lag(2);
 	env = EnvGen.kr(Env.asr(0.01, 1, 0.01), gate, doneAction: 2);
 	sig = SinOsc.ar(freq, 0) + (SinOsc.ar(freq, 0, distortionFactor).tanh);
 	sig = LPF.ar(LFPulse.ar(2).range(0.5,1), 1000) * sig * amp * env;
+	pan = (pan + LFSaw.ar(panRateScale * Rand(0.5,1), 0).range(0, 2)).range(-1, 1);
 	Out.ar(out, ~panEvenly.(sig, pan));
 }).add;
 // Control SynthDefs

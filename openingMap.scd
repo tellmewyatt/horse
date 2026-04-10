@@ -4,6 +4,7 @@
 			var synth= Synth(\sinPulse, [\freq, freq, \pan, rrand(-1.0, 1), \distortionFactor, 0]);
 			current.toggleMap.collect { | synth |
 				synth.set(\distortionFactor, current.toggleMap.size);
+				synth.set(\panRateScale, current.toggleMap.size / 8);
 			};
 			synth;
 		}
