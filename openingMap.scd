@@ -1,9 +1,14 @@
 ~noteMap.def(\opening, { | m |
+	var getDistortionFactor = { | nPlaying, maxDistortion=20 |
+
+		var env = Env([0,maxDistortion], 1, 3);
+		env.at(nPlaying.linlin(1, 8, 0, 1));
+	};
 	var getCol5Func = { | freq |
 		{ | vel, current |
 			var synth= Synth(\sinPulse, [\freq, freq, \pan, rrand(-1.0, 1), \distortionFactor, 0]);
 			current.toggleMap.collect { | synth |
-				synth.set(\distortionFactor, current.toggleMap.size);
+				synth.set(\distortionFactor, getDistortionFactor.(current.toggleMap.size));
 				synth.set(\panRateScale, current.toggleMap.size / 8);
 			};
 			synth;
@@ -11,7 +16,7 @@
 	};
 	var col5ToggleOff = { | vel, current |
 		current.toggleMap.collect { | synth |
-			synth.set(\distortionFactor, current.toggleMap.size);
+			synth.set(\distortionFactor, getDistortionFactor.(current.toggleMap.size));
 		};
 	};
 	// Column 1
@@ -159,4 +164,25 @@
 	8.do { | i |
 		m.toggleOff(15 + (i * 10), col5ToggleOff);
 	};
+
+
+	// Pad Colors
+	m.colorPad({ | nn |
+		var color;
+		var alternate = nn.asString[0].digit % 2;
+		if(nn + alternate % 2 == 0) {
+			color = 120
+		}
+		{
+			color = 21
+		};
+		color;
+	});
+	m.colorPadActive({ | nn |
+		var color = rrand(0, 127);
+		if (nn % 10 == 5) {
+			color = ~config.toggledPadColor;
+		};
+		color;
+	});
 });
