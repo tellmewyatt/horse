@@ -22,7 +22,10 @@ MIDIIn.connectAll;
 			(
 				// Binds this note number and function to be played one off
 				hit: { | innerSelf, nn, func |
-					newMap.onMap[nn] = func;
+					newMap.onMap[nn] = { | vel |
+						newMap.offMap[nn] = 1;
+						func.(vel);
+					};
 				},
 				// Binds this note number and function to be sustained
 				sustain: { | innerSelf, nn, func |
@@ -34,7 +37,6 @@ MIDIIn.connectAll;
 				toggle: { | innerSelf, nn, func |
 					newMap.onMap[nn] = { | vel |
 						if (newMap.toggleMap[nn] == nil) {
-							self.colorPad(nn, newMap.getPadColorActive(nn));
 							newMap.toggleMap[nn] = func.(vel, self.current);
 						} {
 							self.colorPad(nn, newMap.getPadColor(nn));
@@ -53,6 +55,11 @@ MIDIIn.connectAll;
 				},
 				// Allows switching maps
 				switchTo: { | innerSelf, key |
+					self.current.offMap.keys.collect { | nn |
+						self.colorPad(nn, self.current.getPadColor(nn));
+						self.current.offMap[nn].release;
+						self.current.offMap[nn] = nil;
+					};
 					self.current = self.noteMaps[key]
 				},
 				current: self.current,
@@ -78,7 +85,7 @@ MIDIIn.connectAll;
 		8.collect { | row |
 			8.collect { | col |
 				var nn = row * 10 + col + 11;
-				self.colorPad(nn);
+				self.colorPad(nn, self.current.getPadColor(nn));
 			}
 		}
 	};
@@ -87,14 +94,15 @@ MIDIdef.noteOn(\noteOns, { arg ...args;
 	var nn = args[1];
 	var vel = args[0];
 	[nn, vel].postln;
+	~noteMap.colorPad(nn, ~noteMap.current.getPadColorActive(nn));
 	~noteMap.current.onMap[nn].(vel / 127);
 });
 MIDIdef.noteOff(\noteOffs, { arg ...args;
 	var nn = args[1];
 	var vel = args[0];
-	if (~noteMap.current.toggleMap[nn] == nil) {
-		//~noteMap.colorPad(nn);
+	if(~noteMap.current.offMap[nn] != nil) {
+		~noteMap.colorPad(nn, ~noteMap.current.getPadColor(nn));
 		~noteMap.current.offMap[nn].release;
 		~noteMap.current.offMap[nn] = nil;
-	};
+	}
 });

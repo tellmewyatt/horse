@@ -6,10 +6,10 @@ Server.supernova;
 s.reboot;
 "./noteMap.scd".loadRelative;
 "./openingMap.scd".loadRelative;
+"./secondMap.scd".loadRelative;
 "./config.scd".loadRelative;
 "./movementOne.scd".loadRelative;
 ~noteMap.switchTo(\opening);
-~noteMap.colorAllPads();
 ~maxOsc = NetAddr.new("127.0.0.1", 5000);
 s.waitForBoot {
 	// Run the setup
@@ -71,3 +71,5 @@ s.waitForBoot {
 }.play;
 )
 ~busses.video.rgbScales.scope;
+
+~busses.reverb

@@ -7,9 +7,11 @@
 	var getCol5Func = { | freq |
 		{ | vel, current |
 			var synth= Synth(\sinPulse, [\freq, freq, \pan, rrand(-1.0, 1), \distortionFactor, 0]);
+			synth.set(\distortionFactor, getDistortionFactor.(current.toggleMap.size));
+			synth.set(\panRateScale, current.toggleMap.size / 7);
 			current.toggleMap.collect { | synth |
 				synth.set(\distortionFactor, getDistortionFactor.(current.toggleMap.size));
-				synth.set(\panRateScale, current.toggleMap.size / 8);
+				synth.set(\panRateScale, current.toggleMap.size / 7);
 			};
 			synth;
 		}
@@ -160,7 +162,12 @@
 	m.toggle(55, getCol5Func.(295));
 	m.toggle(65, getCol5Func.(400));
 	m.toggle(75, getCol5Func.(420));
-	m.toggle(85, getCol5Func.(490));
+	m.toggle(85, { | vel, current |
+		var synth = getCol5Func.(490).(vel, current);
+		"switching to second".postln;
+		m.switchTo(\second);
+		synth;
+	});
 	8.do { | i |
 		m.toggleOff(15 + (i * 10), col5ToggleOff);
 	};
