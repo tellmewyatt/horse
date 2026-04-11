@@ -10,6 +10,7 @@ s.reboot;
 "./config.scd".loadRelative;
 "./movementOne.scd".loadRelative;
 ~noteMap.switchTo(\opening);
+~noteMap.colorAllPads;
 ~maxOsc = NetAddr.new("127.0.0.1", 5000);
 s.waitForBoot {
 	// Run the setup

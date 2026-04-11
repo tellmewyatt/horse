@@ -60,9 +60,9 @@ MIDIIn.connectAll;
 						self.current.offMap[nn].release;
 						self.current.offMap[nn] = nil;
 					};
-					self.current = self.noteMaps[key]
+					self.currentPointer = key
 				},
-				current: self.current,
+				current: { self.current },
 				// Accepts a callback func(nn)
 				colorPad: { | innerSelf, func |
 					newMap.getPadColor = { | self, nn | func.(nn) };
