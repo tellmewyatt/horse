@@ -63,10 +63,13 @@
 	m.toggle(72, { | vel |
 		Synth(\meoCircles, [\bufnum, ~samples.meo]);
 	});
-	m.hit(78, { | vel|
-		Synth(\sinFmHit, [\freq, 800 * 3.75.midiratio, \amp, 0.8, \cmRatio, 3.5, \modIndex, 2.2, \release, 5, \pan, rrand(-1.0, 1)]);
-		Synth(\sinFmHit, [\freq, 810 * 3.75.midiratio, \amp, 0.8, \cmRatio, 3.52, \modIndex, 2.2, \release, 5, \pan, rrand(-1.0, 1)]);
-	});
+	m.toggle(76, getBellFunc.(88, 800 * 2.25.midiratio));
+	m.toggleOff(76, getBellReleaseFunc.(800 * 2.25.midiratio));
+	m.toggle(77, getBellFunc.(88, 800 * 5.25.midiratio));
+	m.toggleOff(77, getBellReleaseFunc.(800 * 5.25.midiratio));
+	m.toggle(78, getBellFunc.(88, 800 * 7.midiratio));
+	m.toggleOff(78, getBellReleaseFunc.(800 * 7.midiratio));
+
 	m.toggle(81, { | vel | Synth(\sinFmHit, [\freq, 100, \amp, vel * 1.6, \cmRatio, 3.5, \modIndex, 0.5, \release, 10, \pan, rrand(-1.0, 1)]); });
 	m.toggleOff(81, getBellReleaseFunc.(100));
 	m.toggle(82, getBellFunc.(82, 150));
@@ -75,6 +78,7 @@
 	m.toggleOff(83, getBellReleaseFunc.(200));
 	m.toggle(84, getBellFunc.(83, 200));
 	m.toggleOff(84, getBellReleaseFunc.(200));
+	m.toggle(86, getBellFunc.(86, 800));
 	m.toggle(87, getBellFunc.(87, 800 * 1.5.midiratio));
 	m.toggleOff(87, getBellReleaseFunc.(800 * 1.5.midiratio));
 	m.toggle(88, getBellFunc.(88, 800 * 3.75.midiratio));
