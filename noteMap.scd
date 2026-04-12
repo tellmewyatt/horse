@@ -26,7 +26,8 @@ MIDIIn.connectAll;
 			offMap: (),
 			getPadColor: {},
 			getPadColorActive: {},
-			onReset: {}
+			onReset: {},
+			rowControl: {}
 		);
 		// Executes the creation function
 		func.(
@@ -49,10 +50,11 @@ MIDIIn.connectAll;
 					newMap.onMap[nn] = { | vel |
 						if (newMap.toggleMap[nn] == nil) {
 							newMap.toggleMap[nn] = func.(vel, self.current);
+							self.colorPad(nn, ~noteMap.current.getPadColorActive(nn));
 						} {
-							self.colorPad(nn, newMap.getPadColor(nn));
 							newMap.toggleMap[nn].release;
 							newMap.toggleMap[nn] = nil;
+							self.colorPad(nn, newMap.getPadColor(nn));
 						};
 						// Set any additional action for when toggled off
 						if(newMap.toggleOffMap[nn] != nil) {
@@ -80,6 +82,10 @@ MIDIIn.connectAll;
 				// Function called to reset this map
 				onReset: { | innerSelf, func |
 					newMap.onReset = { | self | func.() };
+				},
+				// Callback for whenever any of the right hand buttons are pressed
+				rowControl: { | innerSelf, func |
+					newMap.rowControl = { | self, row | func.(row) };
 				}
 			)
 		);
@@ -118,12 +124,16 @@ MIDIdef.noteOff(\noteOffs, { arg ...args;
 });
 MIDIdef.cc(\control, { | onOff, rowCol |
 	var keys = ~noteMap.noteMaps.keys.asArray.sort;
-	var string = rowCol.asString;
 	if(onOff == 127) {
-		var index = 8 - string[0].digit;
-		var key = keys[index].postln;
-		if(key.notNil) {
-			~noteMap.switchTo(key);
-		};
+		// Switch maps if in the top row
+		if(rowCol.asString[0].digit == 9) {
+			var index = rowCol - 91;
+			var key = keys[index].postln;
+			if(key.notNil) {
+				~noteMap.switchTo(key);
+			};
+		} {
+			~noteMap.current.rowControl(rowCol.asString[0].digit);
+		}
 	}
 });

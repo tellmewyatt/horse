@@ -22,9 +22,6 @@
 			synths = toggleGroups[nn];
 			Synth(\sinFmHit, [\freq, freq, \amp, 0.8 * vel, \cmRatio, 3.5, \modIndex, 2.2, \release, 5, \pan, rrand(-1.0, 1)], synths);
 			Synth(\sinFmHit, [\freq, freq * [-0.33, 0.33].choose.midiratio, \amp, 0.8 * vel, \cmRatio, 3.52, \modIndex, 2.2, \release, 5, \pan, rrand(-1.0, 1)], synths);
-			~enabledRows.add(row);
-			togglePrevious.(row * 10 + 5, vel);
-			~noteMap.colorAllPads;
 			synths;
 		}
 	};
@@ -38,44 +35,27 @@
 	m.hit(18, { | vel |
 		Synth(\sinFmHit, [\freq, 800 * 7.midiratio , \amp, 0.8, \cmRatio, 3.5, \modIndex, 2.2, \release, 5, \pan, rrand(-1.0, 1)]);
 		Synth(\sinFmHit, [\freq, 810 * 7.midiratio, \amp, 0.8, \cmRatio, 3.52, \modIndex, 2.2, \release, 5, \pan, rrand(-1.0, 1)]);
-		~enabledRows.add(1);
-		togglePrevious.(15, vel);
-		~noteMap.colorAllPads;
 	});
 	m.hit(28, { | vel |
 		Synth(\sinFmHit, [\freq, 800 * 7.midiratio , \amp, 0.8, \cmRatio, 3.5, \modIndex, 2.2, \release, 5, \pan, rrand(-1.0, 1)]);
 		Synth(\sinFmHit, [\freq, 810 * 7.midiratio, \amp, 0.8, \cmRatio, 3.52, \modIndex, 2.2, \release, 5, \pan, rrand(-1.0, 1)]);
-		~enabledRows.add(2);
-		togglePrevious.(25, vel);
-		~noteMap.colorAllPads;
 	});
 	m.hit(38, { | vel |
 		Synth(\sinFmHit, [\freq, 800 * 7.midiratio , \amp, 0.8, \cmRatio, 3.5, \modIndex, 2.2, \release, 5, \pan, rrand(-1.0, 1)]);
 		Synth(\sinFmHit, [\freq, 810 * 7.midiratio, \amp, 0.8, \cmRatio, 3.52, \modIndex, 2.2, \release, 5, \pan, rrand(-1.0, 1)]);
-		~enabledRows.add(3);
-		togglePrevious.(35, vel);
-		~noteMap.colorAllPads;
+
 	});
 	m.hit(48, { | vel |
 		Synth(\sinFmHit, [\freq, 800, \amp, 0.8, \cmRatio, 3.5, \modIndex, 2.2, \release, 5, \pan, rrand(-1.0, 1)]);
 		Synth(\sinFmHit, [\freq, 810, \amp, 0.8, \cmRatio, 3.52, \modIndex, 2.2, \release, 5, \pan, rrand(-1.0, 1)]);
-		~enabledRows.add(4);
-		togglePrevious.(45, vel);
-		~noteMap.colorAllPads;
 	});
 	m.hit(58, { | vel |
 		Synth(\sinFmHit, [\freq, 800 * 7.midiratio , \amp, 0.8, \cmRatio, 3.5, \modIndex, 2.2, \release, 5, \pan, rrand(-1.0, 1)]);
 		Synth(\sinFmHit, [\freq, 810 * 7.midiratio, \amp, 0.8, \cmRatio, 3.52, \modIndex, 2.2, \release, 5, \pan, rrand(-1.0, 1)]);
-		~enabledRows.add(5);
-		togglePrevious.(55, vel);
-		~noteMap.colorAllPads;
 	});
 	m.hit(68, { | vel |
 		Synth(\sinFmHit, [\freq, 800 * 7.midiratio , \amp, 0.8, \cmRatio, 3.5, \modIndex, 2.2, \release, 5, \pan, rrand(-1.0, 1)]);
 		Synth(\sinFmHit, [\freq, 810 * 7.midiratio, \amp, 0.8, \cmRatio, 3.52, \modIndex, 2.2, \release, 5, \pan, rrand(-1.0, 1)]);
-		~enabledRows.add(6);
-		togglePrevious.(65, vel);
-		~noteMap.colorAllPads;
 	});
 	m.toggle(71, { | vel |
 		Synth(\sinPulse, [\freq, 50, \pan, rrand(-1.0, 1), \distortionFactor, 20]);
@@ -86,9 +66,6 @@
 	m.hit(78, { | vel|
 		Synth(\sinFmHit, [\freq, 800 * 3.75.midiratio, \amp, 0.8, \cmRatio, 3.5, \modIndex, 2.2, \release, 5, \pan, rrand(-1.0, 1)]);
 		Synth(\sinFmHit, [\freq, 810 * 3.75.midiratio, \amp, 0.8, \cmRatio, 3.52, \modIndex, 2.2, \release, 5, \pan, rrand(-1.0, 1)]);
-		~enabledRows.add(7);
-		togglePrevious.(75, vel);
-		~noteMap.colorAllPads;
 	});
 	m.toggle(81, { | vel | Synth(\sinFmHit, [\freq, 100, \amp, vel * 1.6, \cmRatio, 3.5, \modIndex, 0.5, \release, 10, \pan, rrand(-1.0, 1)]); });
 	m.toggleOff(81, getBellReleaseFunc.(100));
@@ -116,6 +93,18 @@
 		synth;
 	});
 
+	// Column 9
+	m.rowControl({ | row |
+		~enabledRows.add(row);
+		togglePrevious.(row * 10 + 5);
+		(1..8).do { | i |
+			var nn = row * 10 + i;
+			nn.postln;
+			if(m.current.toggleMap[nn].isNil) {
+				~noteMap.colorPad(nn, m.current.getPadColor(nn));
+			};
+		};
+	});
 	// Pad Colors
 	m.colorPad({ | nn |
 		var color;
@@ -125,9 +114,6 @@
 		}
 		{
 			color = 21
-		};
-		if(nn % 10 == 5) {
-			color = ~config.toggledPadColor;
 		};
 		if(~enabledRows.includes(nn.asString[0].digit)) {
 			color = ~config.enabledRowColor;
