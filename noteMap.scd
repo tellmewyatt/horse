@@ -5,8 +5,18 @@ MIDIIn.connectAll;
 	noteMaps: if(~noteMap != nil) { ~noteMap.noteMaps } { () },
 	currentPointer: if(~noteMap != nil) { ~noteMap.currentPointer } { nil },
 	current: { | self | self.noteMaps[self.currentPointer] },
-	switchTo: { | self, name |
-		self.currentPointer = name;
+	switchTo: { | self, key |
+		if(self.current.notNil) {
+			self.current.offMap.keys.collect { | nn |
+				self.colorPad(nn, self.current.getPadColor(nn));
+				self.current.offMap[nn].release;
+				self.current.offMap[nn] = nil;
+			};
+			self.current.onReset;
+		};
+		self.currentPointer = key;
+		self.colorAllPads;
+
 	},
 	def: { | self, name, func |
 		var newMap = (
@@ -15,7 +25,8 @@ MIDIIn.connectAll;
 			toggleOffMap: (),
 			offMap: (),
 			getPadColor: {},
-			getPadColorActive: {}
+			getPadColorActive: {},
+			onReset: {}
 		);
 		// Executes the creation function
 		func.(
@@ -55,12 +66,7 @@ MIDIIn.connectAll;
 				},
 				// Allows switching maps
 				switchTo: { | innerSelf, key |
-					self.current.offMap.keys.collect { | nn |
-						self.colorPad(nn, self.current.getPadColor(nn));
-						self.current.offMap[nn].release;
-						self.current.offMap[nn] = nil;
-					};
-					self.currentPointer = key
+					self.switchTo(key);
 				},
 				current: { self.current },
 				// Accepts a callback func(nn)
@@ -70,6 +76,10 @@ MIDIIn.connectAll;
 				// Accepts a callback func(nn)
 				colorPadActive: { | innerSelf, func |
 					newMap.getPadColorActive = { | self, nn | func.(nn) };
+				},
+				// Function called to reset this map
+				onReset: { | innerSelf, func |
+					newMap.onReset = { | self | func.() };
 				}
 			)
 		);
@@ -104,5 +114,16 @@ MIDIdef.noteOff(\noteOffs, { arg ...args;
 		~noteMap.colorPad(nn, ~noteMap.current.getPadColor(nn));
 		~noteMap.current.offMap[nn].release;
 		~noteMap.current.offMap[nn] = nil;
+	}
+});
+MIDIdef.cc(\control, { | onOff, rowCol |
+	var keys = ~noteMap.noteMaps.keys.asArray.sort;
+	var string = rowCol.asString;
+	if(onOff == 127) {
+		var index = 8 - string[0].digit;
+		var key = keys[index].postln;
+		if(key.notNil) {
+			~noteMap.switchTo(key);
+		};
 	}
 });

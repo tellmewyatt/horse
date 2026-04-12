@@ -5,11 +5,11 @@ s.options.hardwareBufferSize = 1024;
 Server.supernova;
 s.reboot;
 "./noteMap.scd".loadRelative;
-"./openingMap.scd".loadRelative;
-"./secondMap.scd".loadRelative;
+"./aMap.scd".loadRelative;
+"./bMap.scd".loadRelative;
 "./config.scd".loadRelative;
 "./movementOne.scd".loadRelative;
-~noteMap.switchTo(\opening);
+~noteMap.switchTo(\a);
 ~noteMap.colorAllPads;
 ~maxOsc = NetAddr.new("127.0.0.1", 5000);
 s.waitForBoot {
@@ -39,6 +39,7 @@ s.waitForBoot {
 		~samples.whatami = Buffer.readChannel(s, "audio/03.flac".resolveRelative, channels:[0]);
 		~samples.gallopsL = Buffer.readChannel(s, "audio/gallops.wav".resolveRelative, channels:[0]);
 		~samples.gallopsR = Buffer.readChannel(s, "audio/gallops.wav".resolveRelative, channels:[1]);
+		~samples.meo = Buffer.readChannel(s, "./audio/meo-1.wav".resolveRelative, channels:[0]);
 		~samples.neighs = PathName("audio/horse-neighs".resolveRelative).entries.collect { | path |
 			Buffer.readChannel(s, path.absolutePath, channels:[0])
 		};
@@ -71,6 +72,3 @@ s.waitForBoot {
 	}
 }.play;
 )
-~busses.video.rgbScales.scope;
-
-~busses.reverb

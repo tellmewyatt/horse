@@ -254,6 +254,17 @@ SynthDef(\noisyCrossControlled, { | out = 0, amp = 0.2, bufnum, gate=1, pan=0, p
 		~panEvenly.(Limiter.ar(sig, 0.5), pan, 2, 0.5)
 	);
 }).add;
+SynthDef(\meoCircles, { | out=0, amp=1, panRate=0.5, bufnum, playbackRate=1, gate=1 |
+	var trig = Impulse.ar(2);
+	var sig = GrainBuf.ar(1, trig, 4, bufnum, playbackRate * TRand.kr(-0.25.midiratio, 0.25.midiratio, trig), LFSaw.kr(0.2).range(0, 1)) * 4;
+	var pan = LFSaw.kr(panRate).range(-1, 1) * -1;
+	var env = EnvGen.kr(Env.asr(0.01, 1, 0.01), gate, doneAction: 2);
+	sig = (sig.tanh / 4) * amp;
+	Out.ar(out, ~panEvenly.(
+		sig,
+		pan
+	));
+}).add;
 SynthDef(\sinPulse, { | freq=200, gate=1, out = 0 , amp=0.1, pan=0, distortionFactor=0, panRateScale=0 |
 	var env, sig;
 	// Prevent distortion factor from being less than 0
@@ -264,14 +275,15 @@ SynthDef(\sinPulse, { | freq=200, gate=1, out = 0 , amp=0.1, pan=0, distortionFa
 	pan = (pan + LFSaw.ar(panRateScale * Rand(0.5,1), 0).range(0, 2)).range(-1, 1);
 	Out.ar(out, ~panEvenly.(sig, pan));
 }).add;
-SynthDef(\sinFmHit, { | freq = 200, modIndex = 10, cmRatio=2.31, pan=0, width=2, out=0, release=2, attack=0, amp=0.1, curve= -4, modIndexCurve= -4, reverbMix= 0.7  |
+SynthDef(\sinFmHit, { | freq = 200, modIndex = 10, cmRatio=2.31, pan=0, width=2, out=0, release=2, attack=0, amp=0.1, curve= -4, modIndexCurve= -4, reverbMix= 0.7, gate=1  |
 	var env = EnvGen.kr(Env.perc(attack, release, curve: curve), doneAction: 2);
+	var sustainEnv = EnvGen.kr(Env.asr(0, 1, 0.1), gate);
 	var sig;
 	modIndex = EnvGen.kr(Env.perc(attack,release, curve: modIndexCurve), 1, modIndex);
 	sig = ~panEvenly.(SinOsc.ar(freq + SinOsc.ar(cmRatio * freq, 0.2, modIndex * cmRatio * freq), 0.5pi, 0.5), pan, width=2);
 	sig = FreeVerb.ar(sig, reverbMix);
 	Out.ar(out,
-		sig * amp * env
+		sig * amp * env * sustainEnv
 	);
 }).add;
 
