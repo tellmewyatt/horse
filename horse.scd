@@ -12,6 +12,31 @@ s.reboot;
 ~noteMap.switchTo(\a);
 ~noteMap.colorAllPads;
 ~maxOsc = NetAddr.new("127.0.0.1", 5000);
+~setupEffects = {
+	~reverb = Synth(\reverb, [\in, ~busses.reverb]);
+	~scaleVideoRGB = Synth.tail(s, \videoControl3, [\in, ~busses.video.rgbScales, \out, ~busses.video.rgbScales]);
+	~scaleVideoNoise = Synth.tail(s, \videoControl, [\in, ~busses.video.noiseLevel, \out, ~busses.video.noiseLevel]);
+	~rgbOffset = Synth(\rgbOffset, [\out, ~busses.video.rgbScales]);
+	~saturationOffset = Synth(\videoOffset, [\out, ~busses.video.saturation]);
+	// Create the parallel group that will persist forever
+	~parGroup = ParGroup(s);
+	~sendVideoData = r {
+		loop {
+			~busses.video.rgbScales.get({ | value |
+				~maxOsc.sendMsg("/rscale", value[0]);
+				~maxOsc.sendMsg("/gscale", value[1]);
+				~maxOsc.sendMsg("/bscale", value[2]);
+			});
+			~busses.video.noiseLevel.get({ | value |
+				~maxOsc.sendMsg("/noiseLevel", value);
+			});
+			~busses.video.saturation.get({ | value |
+				~maxOsc.sendMsg("/saturation", value);
+			});
+			0.01.wait;
+		}
+	}.play;
+};
 s.waitForBoot {
 	// Run the setup
 	r {
@@ -43,32 +68,8 @@ s.waitForBoot {
 		~samples.neighs = PathName("audio/horse-neighs".resolveRelative).entries.collect { | path |
 			Buffer.readChannel(s, path.absolutePath, channels:[0])
 		};
+		~setupEffects.();
 	}.play;
 
 }
-)
-(
-~reverb = Synth(\reverb, [\in, ~busses.reverb]);
-~scaleVideoRGB = Synth.tail(s, \videoControl3, [\in, ~busses.video.rgbScales, \out, ~busses.video.rgbScales]);
-~scaleVideoNoise = Synth.tail(s, \videoControl, [\in, ~busses.video.noiseLevel, \out, ~busses.video.noiseLevel]);
-~rgbOffset = Synth(\rgbOffset, [\out, ~busses.video.rgbScales]);
-~saturationOffset = Synth(\videoOffset, [\out, ~busses.video.saturation]);
-// Create the parallel group that will persist forever
-~parGroup = ParGroup(s);
-~sendVideoData = r {
-	loop {
-		~busses.video.rgbScales.get({ | value |
-			~maxOsc.sendMsg("/rscale", value[0]);
-			~maxOsc.sendMsg("/gscale", value[1]);
-			~maxOsc.sendMsg("/bscale", value[2]);
-		});
-		~busses.video.noiseLevel.get({ | value |
-			~maxOsc.sendMsg("/noiseLevel", value);
-		});
-		~busses.video.saturation.get({ | value |
-			~maxOsc.sendMsg("/saturation", value);
-		});
-		0.01.wait;
-	}
-}.play;
 )

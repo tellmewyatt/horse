@@ -223,13 +223,13 @@ SynthDef(\crazyFall, { | out = 0, dur=1, amp=0.1, pan=0, spread=0.5, startFreq=2
 	sig = ~panEvenly.(sig, pan, 2, spread);
 	Out.ar(out, sig);
 }).add;
-SynthDef(\noisyCross, { | out = 0, amp = 0.2, bufnum, gate=1 |
+SynthDef(\noisyCross, { | out = 0, amp = 0.2, bufnum, gate=1, minPlaybackRate=0.9, maxPlaybackRate=1.1 |
 	var modulator, trig, sig, pan, env;
 	env = EnvGen.kr(Env.asr(0.001, 1, 0.001), gate, doneAction: 2);
 	pan = LFNoise2.kr(1);
 	modulator = StandardL.ar(LFNoise1.ar(0.1).range(100, 6000), 1.2);
 	trig = Dust.ar(40);
-	sig = GrainBuf.ar(1, trig, 0.5, bufnum, TRand.kr(0.9, 1.1, trig) * BufRateScale.kr(bufnum), LFNoise2.ar(0.2).range(0, 0.9));
+	sig = GrainBuf.ar(1, trig, 0.5, bufnum, TRand.kr(minPlaybackRate, maxPlaybackRate, trig) * BufRateScale.kr(bufnum), LFNoise2.ar(0.2).range(0, 0.9));
 	sig = sig * modulator + sig;
 	sig = sig * amp;
 	sig = DelayN.ar(sig, 0.3, Rand(0.1, 0.3 ! 4));
@@ -254,22 +254,22 @@ SynthDef(\noisyCrossControlled, { | out = 0, amp = 0.2, bufnum, gate=1, pan=0, p
 		~panEvenly.(Limiter.ar(sig, 0.5), pan, 2, 0.5)
 	);
 }).add;
-SynthDef(\meoCircles, { | out=0, amp=1, panRate=0.5, bufnum, playbackRate=1, gate=1 |
+SynthDef(\meoCircles, { | out=0, amp=1, panRate=0.5, bufnum, playbackRate=1, gate=1, release=0.01 |
 	var trig = Impulse.ar(2);
 	var sig = GrainBuf.ar(1, trig, 4, bufnum, playbackRate * TRand.kr(-0.25.midiratio, 0.25.midiratio, trig), LFSaw.kr(0.2).range(0, 1)) * 4;
 	var pan = LFSaw.kr(panRate).range(-1, 1) * -1;
-	var env = EnvGen.kr(Env.asr(0.01, 1, 0.01), gate, doneAction: 2);
+	var env = EnvGen.kr(Env.asr(0.01, 1, release), gate, doneAction: 2);
 	sig = (sig.tanh / 4) * amp;
 	Out.ar(out, ~panEvenly.(
-		sig,
+		sig * env,
 		pan
 	));
 }).add;
-SynthDef(\sinPulse, { | freq=200, gate=1, out = 0 , amp=0.1, pan=0, distortionFactor=0, panRateScale=0 |
+SynthDef(\sinPulse, { | freq=200, gate=1, out = 0 , amp=0.1, pan=0, distortionFactor=0, panRateScale=0, release=0.01 |
 	var env, sig;
 	// Prevent distortion factor from being less than 0
 	distortionFactor = distortionFactor.max(0).lag(2);
-	env = EnvGen.kr(Env.asr(0.01, 1, 0.01), gate, doneAction: 2);
+	env = EnvGen.kr(Env.asr(0.01, 1, release), gate, doneAction: 2);
 	sig = SinOsc.ar(freq, 0) + (SinOsc.ar(freq, 0, distortionFactor).tanh);
 	sig = LPF.ar(LFPulse.ar(2).range(0.5,1), 1000) * sig * amp * env;
 	pan = (pan + LFSaw.ar(panRateScale * Rand(0.5,1), 0).range(0, 2)).range(-1, 1);
