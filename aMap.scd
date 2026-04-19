@@ -21,6 +21,7 @@
 			synth.set(\distortionFactor, getDistortionFactor.(current.toggleMap.size));
 		};
 	};
+	~getDistortionFactor = getDistortionFactor;
 	// Column 1
 	m.hit(61, { | velocity |
 		Synth(\normalizedVocoder, [

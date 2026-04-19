@@ -1,8 +1,10 @@
 ~noteMap.def(\b, { | m |
 	// Turns off the previously held notes if they are on
 	var finalReleaseTime=20;
+	var maxAmp = 0.4;
+	var plateVerbAmp = 1;
 	var getCol5Func = { | freq, release=0.01 |
-		{ | vel | Synth(\meoCircles, [\bufnum, ~samples.meo, \playbackRate, freq/205, \release, release]); }
+		{ | vel | Synth(\meoCircles, [\bufnum, ~samples.meo, \playbackRate, freq/205, \release, release, \amp, 0.8]); }
 	};
 	var enabledRows = Set();
 	var toggleGroups = ();
@@ -10,6 +12,9 @@
 		var map = ~noteMap.noteMaps.a;
 		if(map.toggleMap[nn].notNil) {
 			map.onMap[nn].(vel);
+			map.toggleMap.collect { | synth |
+				synth.set(\distortionFactor, ~getDistortionFactor.(map.toggleMap.size));
+			};
 		};
 	};
 	var getBellFunc = { | nn, freq |
@@ -17,45 +22,63 @@
 			var synths;
 			var row = nn.asString[0].digit;
 			if(toggleGroups[nn].isNil) {
-				toggleGroups[nn] = Group(s);
+				toggleGroups[nn] = Group(~parGroup);
 				synths = toggleGroups[nn];
 			};
 			synths = toggleGroups[nn];
-			Synth(\sinFmHit, [\freq, freq, \amp, 0.8 * vel, \cmRatio, 3.5, \modIndex, 2.2, \release, 5, \pan, rrand(-1.0, 1)], synths);
-			Synth(\sinFmHit, [\freq, freq * [-0.33, 0.33].choose.midiratio, \amp, 0.8 * vel, \cmRatio, 3.52, \modIndex, 2.2, \release, 5, \pan, rrand(-1.0, 1)], synths);
+			Synth(\sinFmHit, [\freq, freq, \amp, maxAmp * vel, \cmRatio, 3.5, \modIndex, 2.2, \release, 5, \pan, rrand(-1.0, 1), \reverbBus, ~busses.plateVerb, \reverbAmp, plateVerbAmp], synths);
+			Synth(\sinFmHit, [\freq, freq * [-0.33, 0.33].choose.midiratio, \amp, maxAmp * vel, \cmRatio, 3.52, \modIndex, 2.2, \release, 5, \pan, rrand(-1.0, 1), \reverbBus, ~busses.plateVerb, \reverbAmp, plateVerbAmp], synths);
 			synths;
 		}
 	};
 	var getBellReleaseFunc = { | freq |
 		{ | vel |
-			Synth(\sinFmHit, [\freq, freq, \amp, 0.8 * vel, \cmRatio, 3.5, \modIndex, 2.2, \release, 0.4, \pan, rrand(-1.0, 1)]);
-			Synth(\sinFmHit, [\freq, freq * [-0.33, 0.33].choose.midiratio, \amp, 0.8 * vel, \cmRatio, 3.52, \modIndex, 2.2, \release, 0.4, \pan, rrand(-1.0, 1)]);
+			Synth(\sinFmHit, [\freq, freq, \amp, maxAmp * vel, \cmRatio, 3.5, \modIndex, 2.2, \release, 0.4, \pan, rrand(-1.0, 1), \reverbBus, ~busses.plateVerb, \reverbAmp, plateVerbAmp]);
+			Synth(\sinFmHit, [\freq, freq * [-0.33, 0.33].choose.midiratio, \amp, maxAmp * vel, \cmRatio, 3.52, \modIndex, 2.2, \release, 0.4, \pan, rrand(-1.0, 1), \reverbBus, ~busses.plateVerb, \reverbAmp, plateVerbAmp]);
 		}
 	};
 	var bellToggle = { | nn, freq |
 		m.toggle(nn, getBellFunc.(nn, freq));
 		m.toggleOff(nn, getBellReleaseFunc.(freq));
 	};
-	m.toggle(14, { | vel | Synth(\noisyCross, [\bufnum, ~samples.whatami, \amp, 0.4]) });
+	var centerHit = { | nn, freq |
+		m.hit(nn, { | vel |
+			Synth(\sinFmHit, [\freq, freq, \amp, maxAmp * vel, \cmRatio, 2.31, \modIndex,2, \release, 20, \pan, rrand(-1.0, 1), \reverbBus, ~busses.plateVerb, \reverbAmp, plateVerbAmp]);
+			Synth(\sinFmHit, [\freq, freq * rrand(-0.25, 0.25).midiratio, \amp, maxAmp * vel, \cmRatio, 2.31, \modIndex,2, \release, 10, \pan, rrand(-1.0, 1), \reverbBus, ~busses.plateVerb, \reverbAmp, plateVerbAmp]);
+		});
+	};
+	/*m.toggle(14, { | vel | Synth(\noisyCross, [\bufnum, ~samples.whatami, \amp, 0.4]) });
 	m.toggle(15, { | vel | Synth(\sinPulse, [\freq, 200 * 7.midiratio, \distortionFactor, 2, \release, finalReleaseTime]) });
 	m.toggle(16, { | vel | Synth(\sinPulse, [\freq, 100, \distortionFactor, 2, \release, finalReleaseTime]) });
 	m.hit(18, { | vel |
 		Synth(\sinFmHit, [\freq, 800 * 7.midiratio , \amp, 0.8, \cmRatio, 3.5, \modIndex, 2.2, \release, 5, \pan, rrand(-1.0, 1)]);
 		Synth(\sinFmHit, [\freq, 810 * 7.midiratio, \amp, 0.8, \cmRatio, 3.52, \modIndex, 2.2, \release, 5, \pan, rrand(-1.0, 1)]);
-	});
-	m.hit(28, { | vel |
-		Synth(\sinFmHit, [\freq, 800 * 7.midiratio , \amp, 0.8, \cmRatio, 3.5, \modIndex, 2.2, \release, 5, \pan, rrand(-1.0, 1)]);
-		Synth(\sinFmHit, [\freq, 810 * 7.midiratio, \amp, 0.8, \cmRatio, 3.52, \modIndex, 2.2, \release, 5, \pan, rrand(-1.0, 1)]);
-	});
-	m.hit(38, { | vel |
-		Synth(\sinFmHit, [\freq, 800 * 7.midiratio , \amp, 0.8, \cmRatio, 3.5, \modIndex, 2.2, \release, 5, \pan, rrand(-1.0, 1)]);
-		Synth(\sinFmHit, [\freq, 810 * 7.midiratio, \amp, 0.8, \cmRatio, 3.52, \modIndex, 2.2, \release, 5, \pan, rrand(-1.0, 1)]);
+	});*/
+	bellToggle.(13, 200);
+	bellToggle.(12, 200 * -7.midiratio);
+	bellToggle.(11, 200 * -12.midiratio);
+	bellToggle.(18, 600);
+	bellToggle.(17, 600 * -1.5.midiratio);
+	bellToggle.(16, 600 * -3.75.midiratio);
 
-	});
-	m.hit(48, { | vel |
-		Synth(\sinFmHit, [\freq, 800, \amp, 0.8, \cmRatio, 3.5, \modIndex, 2.2, \release, 5, \pan, rrand(-1.0, 1)]);
-		Synth(\sinFmHit, [\freq, 810, \amp, 0.8, \cmRatio, 3.52, \modIndex, 2.2, \release, 5, \pan, rrand(-1.0, 1)]);
-	});
+	bellToggle.(23, 300 * -1.25.midiratio);
+	bellToggle.(22, 300 * -2.5.midiratio);
+	bellToggle.(21, 300 * -4.midiratio);
+	bellToggle.(28, 600 * -2.25.midiratio);
+	bellToggle.(27, 600 * -5.25.midiratio);
+	bellToggle.(26, 600 * -7.midiratio);
+	bellToggle.(31, 300 * 1.25.midiratio);
+	bellToggle.(32, 300 * 2.5.midiratio);
+	bellToggle.(33, 300 * 4.midiratio);
+	bellToggle.(36, 600 * 2.25.midiratio);
+	bellToggle.(37, 600 * 5.25.midiratio);
+	bellToggle.(38, 600 * 7.midiratio);
+	bellToggle.(41, 200);
+	bellToggle.(42, 200 * 7.midiratio);
+	bellToggle.(43, 200 * 12.midiratio);
+	bellToggle.(46, 600);
+	bellToggle.(47, 600 * 1.5.midiratio);
+	bellToggle.(48, 600 * 3.75.midiratio);
 	m.hit(58, { | vel |
 		Synth(\sinFmHit, [\freq, 800 * 7.midiratio , \amp, 0.8, \cmRatio, 3.5, \modIndex, 2.2, \release, 5, \pan, rrand(-1.0, 1)]);
 		Synth(\sinFmHit, [\freq, 810 * 7.midiratio, \amp, 0.8, \cmRatio, 3.52, \modIndex, 2.2, \release, 5, \pan, rrand(-1.0, 1)]);
@@ -71,6 +94,8 @@
 	bellToggle.(63, 200 * -1.25.midiratio);
 	bellToggle.(62, 200 * -2.5.midiratio);
 	bellToggle.(61, 200 * -4.midiratio);
+	centerHit.(64, 200 * 2.midiratio);
+	centerHit.(65, 100 * 2.midiratio);
 	bellToggle.(68, 800 * -2.25.midiratio);
 	bellToggle.(67, 800 * -5.25.midiratio);
 	bellToggle.(66, 800 * -7.midiratio);
@@ -78,12 +103,18 @@
 	bellToggle.(71, 200 * 1.25.midiratio);
 	bellToggle.(72, 200 * 2.5.midiratio);
 	bellToggle.(73, 200 * 4.midiratio);
+	centerHit.(74, 200 * 4.midiratio);
+	centerHit.(75, 100 * 4.midiratio);
 	bellToggle.(76, 800 * 2.25.midiratio);
 	bellToggle.(77, 800 * 5.25.midiratio);
 	bellToggle.(78, 800 * 7.midiratio);
+
+
 	bellToggle.(81, 100);
 	bellToggle.(82, 100 * 7.midiratio);
 	bellToggle.(83, 100 * 12.midiratio);
+	centerHit.(84, 200);
+	centerHit.(85, 100);
 	bellToggle.(86, 800);
 	bellToggle.(87, 800 * 1.5.midiratio);
 	bellToggle.(88, 800 * 3.75.midiratio);

@@ -14,6 +14,7 @@ s.reboot;
 ~maxOsc = NetAddr.new("127.0.0.1", 5000);
 ~setupEffects = {
 	~reverb = Synth(\reverb, [\in, ~busses.reverb]);
+	~plateVerb = Synth(\reverb,  [\in, ~busses.plateVerb, \room, 0.1, \damp, 1, \amp, 1.5]);
 	~scaleVideoRGB = Synth.tail(s, \videoControl3, [\in, ~busses.video.rgbScales, \out, ~busses.video.rgbScales]);
 	~scaleVideoNoise = Synth.tail(s, \videoControl, [\in, ~busses.video.noiseLevel, \out, ~busses.video.noiseLevel]);
 	~rgbOffset = Synth(\rgbOffset, [\out, ~busses.video.rgbScales]);
@@ -45,6 +46,8 @@ s.waitForBoot {
 		~busses = ();
 		// Create the reverb bus
 		~busses.reverb = Bus.audio(s, s.options.numOutputBusChannels);
+		// Create the plateVerb bus
+		~busses.plateVerb = Bus.audio(s, s.options.numOutputBusChannels);
 		// Controls RGB video
 		~busses.video= (
 			rgbScales: Bus.control(s, 3),

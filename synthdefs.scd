@@ -275,16 +275,15 @@ SynthDef(\sinPulse, { | freq=200, gate=1, out = 0 , amp=0.1, pan=0, distortionFa
 	pan = (pan + LFSaw.ar(panRateScale * Rand(0.5,1), 0).range(0, 2)).range(-1, 1);
 	Out.ar(out, ~panEvenly.(sig, pan));
 }).add;
-SynthDef(\sinFmHit, { | freq = 200, modIndex = 10, cmRatio=2.31, pan=0, width=2, out=0, release=2, attack=0, amp=0.1, curve= -4, modIndexCurve= -4, reverbMix= 0.7, gate=1  |
+SynthDef(\sinFmHit, { | freq = 200, modIndex = 10, cmRatio=2.31, pan=0, width=2, out=0, release=2, attack=0, amp=0.1, curve= -4, modIndexCurve= -4, reverbBus, reverbAmp, gate=1  |
 	var env = EnvGen.kr(Env.perc(attack, release, curve: curve), doneAction: 2);
 	var sustainEnv = EnvGen.kr(Env.asr(0, 1, 0.1), gate);
 	var sig;
 	modIndex = EnvGen.kr(Env.perc(attack,release, curve: modIndexCurve), 1, modIndex);
 	sig = ~panEvenly.(SinOsc.ar(freq + SinOsc.ar(cmRatio * freq, 0.2, modIndex * cmRatio * freq), 0.5pi, 0.5), pan, width=2);
-	sig = FreeVerb.ar(sig, reverbMix);
-	Out.ar(out,
-		sig * amp * env * sustainEnv
-	);
+	sig = sig * amp * env * sustainEnv;
+	Out.ar(reverbBus, sig * reverbAmp);
+	Out.ar(out, sig);
 }).add;
 
 

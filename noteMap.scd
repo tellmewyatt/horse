@@ -104,23 +104,31 @@ MIDIIn.connectAll;
 				self.colorPad(nn, self.current.getPadColor(nn));
 			}
 		}
-	};
+	},
+	midiNoteOn: { | self, nn, vel |
+		self.colorPad(nn, self.current.getPadColorActive(nn));
+		self.current.onMap[nn].(vel / 127);
+	},
+	midiNoteOff: { | self, nn, vel |
+		if(self.current.offMap[nn] != nil) {
+			self.colorPad(nn, self.current.getPadColor(nn));
+			self.current.offMap[nn].release;
+			self.current.offMap[nn] = nil;
+		}
+	}
 );
 MIDIdef.noteOn(\noteOns, { arg ...args;
 	var nn = args[1];
 	var vel = args[0];
 	[nn, vel].postln;
-	~noteMap.colorPad(nn, ~noteMap.current.getPadColorActive(nn));
-	~noteMap.current.onMap[nn].(vel / 127);
+	~noteMap.midiNoteOn(nn, vel);
+
 });
 MIDIdef.noteOff(\noteOffs, { arg ...args;
 	var nn = args[1];
 	var vel = args[0];
-	if(~noteMap.current.offMap[nn] != nil) {
-		~noteMap.colorPad(nn, ~noteMap.current.getPadColor(nn));
-		~noteMap.current.offMap[nn].release;
-		~noteMap.current.offMap[nn] = nil;
-	}
+	~noteMap.midiNoteOff(nn, vel);
+
 });
 MIDIdef.cc(\control, { | onOff, rowCol |
 	var keys = ~noteMap.noteMaps.keys.asArray.sort;
