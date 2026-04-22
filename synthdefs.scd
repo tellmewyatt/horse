@@ -310,3 +310,9 @@ SynthDef(\videoControl3, { | out, in, min=0, max=1 |
 	//sig = sig.min(max).max(min);
 	ReplaceOut.kr(out, sig);
 }).add;
+SynthDef(\videoSwirl3, { | out, min=0, max=1, freq=1, amp=1 |
+	Out.kr(out,
+		3.collect { | i |
+			SinOsc.ar(freq, i / 3 * 2pi, amp)
+	});
+}).add;

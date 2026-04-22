@@ -6,7 +6,7 @@
 	};
 	var getCol5Func = { | freq |
 		{ | vel, current |
-			var synth= Synth(\sinPulse, [\freq, freq, \pan, rrand(-1.0, 1), \distortionFactor, 0]);
+			var synth= Synth(\sinPulse, [\freq, freq, \pan, rrand(-1.0, 1), \distortionFactor, 0, \amp, 0.08]);
 			synth.set(\distortionFactor, getDistortionFactor.(current.toggleMap.size));
 			synth.set(\panRateScale, current.toggleMap.size / 7);
 			current.toggleMap.collect { | synth |

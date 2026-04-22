@@ -3,5 +3,6 @@
 	reverbSend: 0.5,
 	bassAmp: 0.4,
 	toggledPadColor: 80,
-	enabledRowColor: 30
+	enabledRowColor: 30,
+	orangeRowColor: 127
 );
