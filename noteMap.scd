@@ -55,11 +55,11 @@ MIDIIn.connectAll;
 							newMap.toggleMap[nn].release;
 							newMap.toggleMap[nn] = nil;
 							self.colorPad(nn, newMap.getPadColor(nn));
+							// Set any additional action for when toggled off
+							if(newMap.toggleOffMap[nn] != nil) {
+								newMap.toggleOffMap[nn].(vel, self.current)
+							}
 						};
-						// Set any additional action for when toggled off
-						if(newMap.toggleOffMap[nn] != nil) {
-							newMap.toggleOffMap[nn].(vel, self.current)
-						}
 					}
 				},
 				// Function to be called after item is released;

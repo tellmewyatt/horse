@@ -16,23 +16,25 @@ s.reboot;
 	~reverb = Synth(\reverb, [\in, ~busses.reverb]);
 	~plateVerb = Synth(\reverb,  [\in, ~busses.plateVerb, \room, 0.1, \damp, 1, \amp, 1.5]);
 	~scaleVideoRGB = Synth.tail(s, \videoControl3, [\in, ~busses.video.rgbScales, \out, ~busses.video.rgbScales]);
-	~scaleVideoNoise = Synth.tail(s, \videoControl, [\in, ~busses.video.noiseLevel, \out, ~busses.video.noiseLevel]);
+	~scaleVideoNoise = Synth.tail(s, \videoControl, [\in, ~busses.video.xfade, \out, ~busses.video.xfade]);
 	~rgbOffset = Synth(\rgbOffset, [\out, ~busses.video.rgbScales]);
 	~saturationOffset = Synth(\videoOffset, [\out, ~busses.video.saturation]);
 	// Create the parallel group that will persist forever
 	~parGroup = ParGroup(s);
+	~maxOsc.sendMsg('/preset', 1);
+	~busses.video.xfade.set(0);
 	~sendVideoData = r {
 		loop {
 			~busses.video.rgbScales.get({ | value |
-				~maxOsc.sendMsg("/rscale", value[0]);
-				~maxOsc.sendMsg("/gscale", value[1]);
-				~maxOsc.sendMsg("/bscale", value[2]);
+				~maxOsc.sendMsg("/scalebias/rscale", value[0]);
+				~maxOsc.sendMsg("/scalebias/gscale", value[1]);
+				~maxOsc.sendMsg("/scalebias/bscale", value[2]);
 			});
-			~busses.video.noiseLevel.get({ | value |
-				~maxOsc.sendMsg("/noiseLevel", value);
+			~busses.video.xfade.get({ | value |
+				~maxOsc.sendMsg("/xfade/xfade", value);
 			});
 			~busses.video.saturation.get({ | value |
-				~maxOsc.sendMsg("/saturation", value);
+				~maxOsc.sendMsg("/brcosa/saturation", value);
 			});
 			0.01.wait;
 		}
@@ -51,7 +53,7 @@ s.waitForBoot {
 		// Controls RGB video
 		~busses.video= (
 			rgbScales: Bus.control(s, 3),
-			noiseLevel: Bus.control(s, 1),
+			xfade: Bus.control(s, 1),
 			saturation: Bus.control(s, 1)
 		);
 		~samples = ();

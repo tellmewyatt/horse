@@ -1,4 +1,5 @@
 ~noteMap.def(\a, { | m |
+	var maxVideoPreset = 1;
 	var getDistortionFactor = { | nPlaying, maxDistortion=20 |
 
 		var env = Env([0,maxDistortion], 1, 3);
@@ -13,17 +14,59 @@
 				synth.set(\distortionFactor, getDistortionFactor.(current.toggleMap.size));
 				synth.set(\panRateScale, current.toggleMap.size / 7);
 			};
+			current.toggleMap.size.postln;
+			~maxOsc.sendMsg("/swirl/theta", (current.toggleMap.size / 6) / 6);
 			synth;
 		}
 	};
 	var col5ToggleOff = { | vel, current |
 		current.toggleMap.collect { | synth |
 			synth.set(\distortionFactor, getDistortionFactor.(current.toggleMap.size));
+			~maxOsc.sendMsg("/swirl/theta", ((current.toggleMap.size - 1) / 6) / 6);
 		};
 	};
 	~getDistortionFactor = getDistortionFactor;
 	// Column 1
+	m.hit(81, { | velocity |
+		Synth(\normalizedVocoder, [
+			\bufnum, ~samples.whatami,
+			\freqRatio, 1,
+			\freq, 500,
+			\convolutionBuffer, ~convolutionBuffers.choose,
+			\reverbSend, ~config.reverbSend,
+			\reverbBus, ~busses.reverb,
+			\amp, 0.2 * velocity,
+			\pan, rrand(-1.0, 1),
+			\oscDefect, 0.1
+		], ~parGroup);
+	});
+	m.hit(71, { | velocity |
+		Synth(\normalizedVocoder, [
+			\bufnum, ~samples.whatami,
+			\freqRatio, 0.8,
+			\freq, 300,
+			\convolutionBuffer, ~convolutionBuffers.choose,
+			\reverbSend, ~config.reverbSend,
+			\reverbBus, ~busses.reverb,
+			\amp, 0.2 * velocity,
+			\pan, rrand(-1.0, 1),
+			\oscDefect, 0.1
+		], ~parGroup);
+	});
 	m.hit(61, { | velocity |
+		Synth(\normalizedVocoder, [
+			\bufnum, ~samples.whatami,
+			\freqRatio, 0.6,
+			\freq, 200,
+			\convolutionBuffer, ~convolutionBuffers.choose,
+			\reverbSend, ~config.reverbSend,
+			\reverbBus, ~busses.reverb,
+			\amp, 0.2 * velocity,
+			\pan, rrand(-1.0, 1),
+			\oscDefect, 0.1
+		], ~parGroup);
+	});
+	m.hit(51, { | velocity |
 		Synth(\normalizedVocoder, [
 			\bufnum, ~samples.whatami,
 			\freqRatio, 0.6,
@@ -32,11 +75,11 @@
 			\reverbSend, ~config.reverbSend,
 			\reverbBus, ~busses.reverb,
 			\amp, 0.2 * velocity,
-			\pan, 0,
+			\pan, rrand(-1.0, 1),
 			\oscDefect, 0.1
 		], ~parGroup);
 	});
-	m.hit(51, {
+	m.hit(41, {
 		Synth(\horseGallop, [
 			\bufnumL, ~samples.gallopsL,
 			\bufnumR, ~samples.gallopsR,
@@ -47,7 +90,7 @@
 
 		], ~parGroup);
 	});
-	m.hit(41, {
+	m.hit(31, {
 		var samp = ~samples.neighs.choose;
 		Synth(\horseGallop, [
 			\bufnumL, samp,
@@ -61,15 +104,12 @@
 
 		]);
 	});
-	m.hit(31, { | velocity |
+	m.hit(21, { | velocity |
 		Synth(\percussiveNoise, [\bufnum, ~convolutionBuffers.choose, \amp, 0.1 * velocity, \release, 0.2 * velocity], ~parGroup);
 	});
-	m.hit(21, { | vel |
+	m.hit(11, { | vel |
 		Synth(\bassDrum, [\amp, vel * 0.5, \releaseTime, 4]);
 		Synth(\videoHit, [\out, ~busses.video.saturation, \amp, vel * 10, \release, 4]);
-	});
-	m.toggle(11, { | velocity |
-		Synth(\vocoder, [\amp, 2, \oscDefect, 1, \reverbBus, ~busses.reverb, \reverbSend, ~config.reverbSend]);
 	});
 
 	// Column 2
@@ -117,11 +157,11 @@
 	// Column 4
 	m.hit(84, { | vel |
 		Synth(\crazyFall, [\dur, 10, \amp, 0.1 * vel, \pan, rrand(-1.0, 1), \startFreq, s.sampleRate]);
-		Synth(\videoHit, [\out, ~busses.video.noiseLevel, \attack, 0.01, \release, 11, \amp, vel]);
+		Synth(\videoHit, [\out, ~busses.video.xfade, \attack, 0.01, \release, 11, \amp, vel]);
 	});
 	m.hit(74, { | vel |
 		Synth(\crazyFall, [\dur, 10, \amp, 0.1 * vel, \pan, rrand(-1.0, 1), \startFreq, 1000, \endFreq, 20000]);
-		Synth(\videoHit, [\out, ~busses.video.noiseLevel, \attack, 0.01, \release, 11, \amp, vel]);
+		Synth(\videoHit, [\out, ~busses.video.xfade, \attack, 0.01, \release, 11, \amp, vel]);
 	});
 	m.sustain(64, { | vel | Synth(\noisyCross, [\bufnum, ~samples.neighs.choose, \amp, 0.2]); });
 	m.sustain(54, { | vel | Synth(\noisyCross, [\bufnum, ~samples.gallopsL, \amp, 0.5]); });
@@ -155,8 +195,50 @@
 			\release, 4
 		], ~parGroup);
 	});
+	m.sustain(24, { | vel |
+		Synth(\normalizedVocoderHeld, [
+			\bufnum, ~samples.gallopsL,
+			\freqRatio, 0.6,
+			\freq, 100 * -6.5,
+			\convolutionBuffer, ~convolutionBuffers.choose,
+			\reverbSend, 0,
+			\reverbBus, ~busses.reverb,
+			\pan, rrand(-1.0, 1),
+			\oscDefect, 0,
+			\amp, 0.1 * vel,
+			\attack, 4,
+			\release, 4
+		], ~parGroup);
+	});
+	m.sustain(14, { | vel |
+		Synth(\normalizedVocoderHeld, [
+			\bufnum, ~samples.gallopsL,
+			\freqRatio, 0.6,
+			\freq, 100 * 6.5.midiratio                                                                                                                                                                                                                                                                                                    ,
+			\convolutionBuffer, ~convolutionBuffers.choose,
+			\reverbSend, 0,
+			\reverbBus, ~busses.reverb,
+			\pan, rrand(-1.0, 1),
+			\oscDefect, 0,
+			\amp, 0.1 * vel,
+			\attack, 4,
+			\release, 4
+		], ~parGroup);
+	});
 	// Column 5
-	m.toggle(15, getCol5Func.(200));
+	m.toggle(15, { | vel, current |
+		var synth = getCol5Func.(200).(vel, current);
+		maxVideoPreset = 2;
+		~maxOsc.sendMsg("/preset", maxVideoPreset);
+		synth;
+	});
+	m.toggleOff(15, { | vel, current |
+		maxVideoPreset = 1;
+		if(~noteMap.currentPointer == \a) {
+			~maxOsc.sendMsg("/preset", maxVideoPreset);
+		};
+		col5ToggleOff.(vel, current);
+	});
 	m.toggle(25, getCol5Func.(300));
 	m.toggle(35, getCol5Func.(350));
 	m.toggle(45, getCol5Func.(266));
@@ -167,8 +249,8 @@
 		var synth = getCol5Func.(490).(vel, current);
 		synth;
 	});
-	8.do { | i |
-		m.toggleOff(15 + (i * 10), col5ToggleOff);
+	7.do { | i |
+		m.toggleOff(15 + (i + 1 * 10), col5ToggleOff);
 	};
 
 
