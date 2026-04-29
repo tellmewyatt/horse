@@ -1,7 +1,7 @@
 (s.options.memSize = 8192 * 100;
 s.options.numWireBufs = 1024;
 s.options.numOutputBusChannels = 8;
-s.options.hardwareBufferSize = 1024;
+s.options.hardwareBufferSize = 2048;
 Server.supernova;
 s.reboot;
 "./noteMap.scd".loadRelative;

@@ -64,7 +64,6 @@
 				colorRow.(i);
 			};
 			Synth(\crazyFall, [\dur, 10, \amp, 0.1 * vel, \pan, rrand(-1.0, 1), \startFreq, s.sampleRate]);
-			Synth(\videoHit, [\out, ~busses.video.xfade, \attack, 0.01, \release, 11, \amp, vel]);
 		})
 	};
 	var colorRow = { | row |
