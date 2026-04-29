@@ -1,31 +1,9 @@
-~channelMaps = (
-	2:(
-		0: 0,
-		1: 1
-	),
-	4: (
-		0: 0,
-		1: 1,
-		2: 3,
-		3: 2
-	),
-	8: (
-		0: 0,
-		1: 4,
-		2: 1,
-		3: 3,
-		4: 7,
-		5: 5,
-		6: 6,
-		7: 2
-	)
-);
 // Evenly pans a signal over the specified number of channels, matching the oreination of the CECM studio
 ~createPanner = {
 	var orientation = if(s.options.numOutputBusChannels == 8, { 0 },
 		{ 0.5 });
 	var nchans = s.options.numOutputBusChannels;
-	var channelMaps = ~channelMaps;
+	var channelMaps = ~config.channelMaps;
 	var getInvertedAsArray = { | map |
 		var inverted = map.invert;
 		inverted.order.collect { | i | inverted[i]; };
@@ -41,7 +19,7 @@
 	var orientation = if(s.options.numOutputBusChannels == 8, { 0 },
 		{ 0.5 });
 	var nchans = s.options.numOutputBusChannels;
-	var channelMaps = ~channelMaps;
+	var channelMaps = ~config.channelMaps;
 	var getInvertedAsArray = { | map |
 		var inverted = map.invert;
 		inverted.order.collect { | i | inverted[i]; };
