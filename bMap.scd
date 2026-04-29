@@ -45,18 +45,6 @@
 		m.toggle(nn, getBellFunc.(nn, freq));
 		m.toggleOff(nn, getBellReleaseFunc.(freq));
 	};
-	/*var centerHit = { | nn, freq |
-		m.hit(nn, { | vel |
-			orangeRows = orangeRows.add( nn.asString[0].digit);
-			(1..8).do { | i |
-				colorRow.(i);
-			};
-			Synth(\sinFmHit, [\freq, freq, \amp, maxAmp * vel, \cmRatio, 2.31, \modIndex,2, \release, 20, \pan, rrand(-1.0, 1), \reverbBus, ~busses.plateVerb, \reverbAmp, plateVerbAmp]);
-			Synth(\sinFmHit, [\freq, freq * rrand(-0.25, 0.25).midiratio, \amp, maxAmp * vel, \cmRatio, 2.31, \modIndex,2, \release, 10, \pan, rrand(-1.0, 1), \reverbBus, ~busses.plateVerb, \reverbAmp, plateVerbAmp]);
-			Synth(\sinFmHit, [\freq, freq * 2, \amp, maxAmp * vel, \cmRatio, 2.31, \modIndex,2, \release, 20, \pan, rrand(-1.0, 1), \reverbBus, ~busses.plateVerb, \reverbAmp, plateVerbAmp]);
-			Synth(\sinFmHit, [\freq, freq * rrand(-0.25, 0.25).midiratio * 2, \amp, maxAmp * vel, \cmRatio, 2.31, \modIndex,2, \release, 10, \pan, rrand(-1.0, 1), \reverbBus, ~busses.plateVerb, \reverbAmp, plateVerbAmp]);
-		});
-	};*/
 	var centerHit = { | nn |
 		m.hit(nn, { | vel |
 			orangeRows = orangeRows.add( nn.asString[0].digit);
