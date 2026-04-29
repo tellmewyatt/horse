@@ -51,6 +51,7 @@
 			(1..8).do { | i |
 				colorRow.(i);
 			};
+			Synth(\videoHit, [\out, ~busses.video.xfade, \attack, 0.01, \release, 10, \amp, vel]);
 			Synth(\crazyFall, [\dur, 10, \amp, 0.1 * vel, \pan, rrand(-1.0, 1), \startFreq, s.sampleRate]);
 		})
 	};
@@ -179,7 +180,7 @@
 		var currentPulsePad = row * 10 + 9;
 		var pulsePad = row * 10 + 5;
 		enabledRows.add(row);
-		(enabledRows.size / 8).postln;
+		enabledRows.postln;
 		~busses.video.xfade.set(enabledRows.size / 8);
 		if(orangeRows.includes(row)) {
 			orangeRows.remove(row);

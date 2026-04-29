@@ -172,7 +172,8 @@
                             "modernui": 1
                         },
                         "classnamespace": "box",
-                        "rect": [ 1726.0, 323.0, 1000.0, 780.0 ],
+                        "rect": [ 400.0, 586.0, 1000.0, 780.0 ],
+                        "visible": 1,
                         "boxes": [
                             {
                                 "box": {
@@ -371,7 +372,7 @@
                                     "numoutlets": 2,
                                     "outlettype": [ "jit_matrix", "" ],
                                     "patching_rect": [ 372.0, 351.0, 386.0, 22.0 ],
-                                    "text": "jit.rota @anchor_x 320 @anchor_y 240 @zoom_x 1.05 @zoom_y 1.05"
+                                    "text": "jit.rota @anchor_x 960 @anchor_y 500 @zoom_x 1.05 @zoom_y 1.05"
                                 }
                             },
                             {
@@ -381,8 +382,8 @@
                                     "numinlets": 1,
                                     "numoutlets": 2,
                                     "outlettype": [ "jit_matrix", "" ],
-                                    "patching_rect": [ 372.0, 299.0, 502.0, 22.0 ],
-                                    "text": "jit.matrix stargate 4 char 640 480 @usedstdim 1 @dstdimstart 120 220 @dstdimend 479 240"
+                                    "patching_rect": [ 372.0, 299.0, 522.0, 22.0 ],
+                                    "text": "jit.matrix stargate 4 char 1920 1080 @usedstdim 1 @dstdimstart 360 475 @dstdimend 1437 525"
                                 }
                             },
                             {
@@ -1541,8 +1542,8 @@
                     "numinlets": 1,
                     "numoutlets": 3,
                     "outlettype": [ "jit_matrix", "bang", "" ],
-                    "patching_rect": [ 887.0, 1074.0, 143.0, 22.0 ],
-                    "text": "jit.world video @enable 1"
+                    "patching_rect": [ 887.0, 1074.0, 238.0, 22.0 ],
+                    "text": "jit.world video @enable 1 @dim 1920 1080"
                 }
             },
             {
@@ -1585,8 +1586,8 @@
                     "numinlets": 1,
                     "numoutlets": 2,
                     "outlettype": [ "jit_matrix", "" ],
-                    "patching_rect": [ 68.5, 204.0, 91.0, 22.0 ],
-                    "text": "jit.grab 640 480"
+                    "patching_rect": [ 68.5, 204.0, 105.0, 22.0 ],
+                    "text": "jit.grab 1920 1080"
                 }
             }
         ],
