@@ -1,5 +1,5 @@
 MIDIIn.connectAll;
-~lpxOut = MIDIOut.newByName("Launchpad X", "LPX MIDI In");
+~lpxOut = MIDIOut.newByName(~config.midiDeviceName, ~config.midiPortName);
 ~lpxOut.latency = 0;
 ~noteMap = (
 	noteMaps: if(~noteMap != nil) { ~noteMap.noteMaps } { () },
